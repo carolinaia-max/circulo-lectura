@@ -7,7 +7,7 @@ RUN npm ci
 
 COPY . .
 
-ARG API_INTERNAL_URL=http://api:8000
+ARG API_INTERNAL_URL=https://circulo-lectura-api.onrender.com
 ENV API_INTERNAL_URL=${API_INTERNAL_URL}
 ENV NEXT_TELEMETRY_DISABLED=1
 
