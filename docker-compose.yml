@@ -25,6 +25,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-circulo_local}
       SEED_EMAIL: ${SEED_EMAIL:-demo@example.com}
       SEED_PASSWORD: ${SEED_PASSWORD:-LecturaDemo2026!}
+      ENABLE_DEMO_SEED: "true"
     depends_on:
       db:
         condition: service_healthy

@@ -1,3 +1,4 @@
+import os
 from hashlib import sha256
 from secrets import token_urlsafe
 from typing import Annotated
@@ -90,6 +91,7 @@ def login(data: LoginRequest, response: Response):
         value=token,
         max_age=8 * 60 * 60,
         httponly=True,
+        secure=os.getenv("COOKIE_SECURE", "false").lower() == "true",
         samesite="lax",
         path="/",
     )
