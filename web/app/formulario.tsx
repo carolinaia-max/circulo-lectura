@@ -1,7 +1,10 @@
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
+  useRef,
   useState,
+  type InputHTMLAttributes,
   type ReactNode,
   type RefObject,
 } from "react";
@@ -145,6 +148,106 @@ export function Campo({
       )}
       {children}
     </div>
+  );
+}
+
+// Propiedades del campo que el espejo copia para que su texto quede
+// exactamente encima del texto del campo.
+const ESTILOS_COPIADOS = [
+  "fontFamily",
+  "fontSize",
+  "fontWeight",
+  "fontStyle",
+  "letterSpacing",
+  "fontVariantNumeric",
+  "textAlign",
+  "paddingTop",
+  "paddingRight",
+  "paddingBottom",
+  "paddingLeft",
+  "borderTopWidth",
+  "borderRightWidth",
+  "borderBottomWidth",
+  "borderLeftWidth",
+] as const;
+
+// Campo de texto que puede resaltar en rojo caracteres sueltos.
+// Un <input> no puede pintar partes de su texto, así que, mientras hay
+// caracteres que resaltar, el texto del campo se vuelve transparente y una
+// capa "espejo" encima (sin eventos de puntero) dibuja el mismo texto con los
+// caracteres inválidos marcados. El cursor, la selección y el foco siguen
+// siendo los del campo real.
+export function EntradaResaltada({
+  resaltar,
+  value,
+  className,
+  ...props
+}: Omit<InputHTMLAttributes<HTMLInputElement>, "value"> & {
+  value: string;
+  resaltar: number[];
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const espejoRef = useRef<HTMLDivElement>(null);
+  const activo = resaltar.length > 0;
+
+  useLayoutEffect(() => {
+    const input = inputRef.current;
+    const espejo = espejoRef.current;
+    if (!activo || !input || !espejo) return;
+
+    const estilos = getComputedStyle(input);
+    for (const propiedad of ESTILOS_COPIADOS) {
+      espejo.style[propiedad] = estilos[propiedad];
+    }
+    const alturaTexto =
+      input.clientHeight -
+      parseFloat(estilos.paddingTop) -
+      parseFloat(estilos.paddingBottom);
+    espejo.style.lineHeight = `${alturaTexto}px`;
+
+    // Mantener el espejo desplazado igual que el campo cuando el texto
+    // es más largo que la caja.
+    const sincronizar = () => {
+      espejo.scrollLeft = input.scrollLeft;
+    };
+    sincronizar();
+
+    const eventos = ["scroll", "input", "keyup", "click", "select", "focus"];
+    eventos.forEach((evento) => input.addEventListener(evento, sincronizar));
+    return () =>
+      eventos.forEach((evento) => input.removeEventListener(evento, sincronizar));
+  }, [activo, value, className]);
+
+  const marcados = new Set(resaltar);
+  const partes: ReactNode[] = [];
+  let index = 0;
+  for (const char of value) {
+    partes.push(
+      marcados.has(index) ? (
+        <span key={index} className="caracter-invalido">
+          {char}
+        </span>
+      ) : (
+        char
+      ),
+    );
+    index += char.length;
+  }
+
+  return (
+    <span className="entrada-resaltable">
+      <input
+        ref={inputRef}
+        value={value}
+        className={[className, activo ? "entrada--resaltada" : ""].filter(Boolean).join(" ")}
+        {...props}
+      />
+      {activo && (
+        <span ref={espejoRef} className="entrada-espejo" aria-hidden="true">
+          {partes}
+        </span>
+      )}
+    </span>
   );
 }
 

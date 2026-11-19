@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 import BookForm from "./BookForm";
 import {
+  EntradaResaltada,
   ErrorApi,
   MensajeError,
   enfocarCampo,
@@ -20,6 +21,7 @@ import {
 } from "../ilustraciones";
 import {
   borradorDesdeLibro,
+  caracteresInvalidos,
   libroDesdeBorrador,
   validateBook,
   type Book,
@@ -306,7 +308,10 @@ export default function CatalogoInteractivo({ initialBooks }: Props) {
 
   function changeField(field: CampoLibro, value: string) {
     setDraft((current) => (current ? { ...current, [field]: value } : current));
-    filaErrores.limpiarCampo(field);
+    // Si quedan caracteres inválidos, el campo sigue marcado y resaltado.
+    if (!(filaErrores.tieneError(field) && caracteresInvalidos(field, value).length)) {
+      filaErrores.limpiarCampo(field);
+    }
   }
 
   function finishEditing() {
@@ -474,7 +479,12 @@ export default function CatalogoInteractivo({ initialBooks }: Props) {
                               column.secundario ? "col-isbn" : "",
                             ].join(" ")}
                           >
-                            <input
+                            <EntradaResaltada
+                              resaltar={
+                                filaErrores.tieneError(column.key)
+                                  ? caracteresInvalidos(column.key, draft[column.key])
+                                  : []
+                              }
                               id={id}
                               aria-label={column.label}
                               className={[

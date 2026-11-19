@@ -175,6 +175,37 @@ button:disabled {
   background: var(--error-fondo);
 }
 
+/* Resaltado de caracteres inválidos dentro del campo.
+   El texto real se vuelve transparente (el cursor sigue visible) y la capa
+   espejo dibuja el mismo texto con los caracteres inválidos en rojo. */
+
+.entrada-resaltable {
+  position: relative;
+  display: block;
+  min-width: 0;
+}
+
+.entrada.entrada--resaltada {
+  color: transparent;
+  caret-color: var(--tinta);
+}
+
+.entrada-espejo {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-style: solid;
+  border-color: transparent;
+  color: var(--tinta);
+  white-space: pre;
+  pointer-events: none;
+}
+
+.caracter-invalido {
+  background: var(--rojo-texto);
+  color: #ffffff;
+}
+
 .entrada[type="number"] {
   -moz-appearance: textfield;
 }

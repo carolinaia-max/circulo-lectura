@@ -5,6 +5,7 @@ import { useState, type FormEvent } from "react";
 
 import {
   Campo,
+  EntradaResaltada,
   MensajeError,
   enfocarCampo,
   leerErrorApi,
@@ -13,6 +14,7 @@ import {
 } from "../formulario";
 import {
   borradorDesdeLibro,
+  caracteresInvalidos,
   libroDesdeBorrador,
   validateBook,
   type Book,
@@ -69,7 +71,11 @@ export default function BookForm({
 
   function change(field: CampoLibro, value: string) {
     setValues((current) => ({ ...current, [field]: value }));
-    limpiarCampo(field);
+    // Si al editar quedan caracteres inválidos, el campo sigue marcado y
+    // el resaltado se actualiza; si ya no quedan, se quita la marca.
+    if (!(tieneError(field) && caracteresInvalidos(field, value).length)) {
+      limpiarCampo(field);
+    }
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -135,7 +141,10 @@ export default function BookForm({
               invalido={tieneError(campo.key)}
               className={`span-${campo.span}`}
             >
-              <input
+              <EntradaResaltada
+                resaltar={
+                  tieneError(campo.key) ? caracteresInvalidos(campo.key, values[campo.key]) : []
+                }
                 id={id}
                 name={campo.key}
                 className={["entrada", "entrada--caja", campo.destacado ? "entrada--destacada" : "", campo.numero ? "numeros" : ""]
