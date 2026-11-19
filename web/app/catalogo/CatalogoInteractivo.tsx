@@ -140,6 +140,13 @@ export default function CatalogoInteractivo({ initialBooks }: Props) {
     }
   }, [editingId]);
 
+  // Si aparece un error en la fila, desplazar la tabla para que se vea.
+  useEffect(() => {
+    if (filaErrores.error) {
+      document.querySelector(".fila-error")?.scrollIntoView({ block: "nearest" });
+    }
+  }, [filaErrores.error]);
+
   // Al pasar a editar la sinopsis, enfocar el textarea.
   useEffect(() => {
     if (editingSynopsis) synopsisTextareaRef.current?.focus();

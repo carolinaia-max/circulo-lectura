@@ -22,7 +22,7 @@ export default async function CatalogoPage() {
   ]);
 
   return (
-    <>
+    <div className="pagina-catalogo">
       <header className="barra">
         <nav aria-label="Sesión" className="barra-nav">
           {email && <span className="barra-correo">{email}</span>}
@@ -43,6 +43,6 @@ export default async function CatalogoPage() {
           </p>
         </main>
       )}
-    </>
+    </div>
   );
 }

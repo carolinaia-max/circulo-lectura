@@ -80,6 +80,7 @@ export function IlustracionLibroCorazon() {
       focusable="false"
       className="registro-svg"
       viewBox="0 0 600 560"
+      preserveAspectRatio="xMidYMax meet"
       fill="none"
     >
       <path d="M300 430 L30 386 L30 446 L300 492 Z" fill={BLANCO} />
