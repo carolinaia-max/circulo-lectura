@@ -33,8 +33,6 @@ type Props = {
   initialBooks: Book[];
 };
 
-const currentYear = new Date().getFullYear();
-
 // Columnas de la tabla, en orden.
 const columns: {
   key: CampoLibro;
@@ -485,12 +483,10 @@ export default function CatalogoInteractivo({ initialBooks }: Props) {
                                 column.key === "titulo" ? "entrada--destacada" : "",
                                 column.numero ? "numeros derecha" : "",
                               ].join(" ")}
-                              type={column.numero ? "number" : "text"}
+                              type="text"
+                              inputMode={column.numero ? "numeric" : undefined}
                               value={draft[column.key]}
-                              min={column.key === "paginas" ? 1 : undefined}
-                              max={column.key === "anio_publicacion" ? currentYear : undefined}
-                              step={column.numero ? 1 : undefined}
-                              maxLength={column.numero ? undefined : 250}
+                              maxLength={column.numero ? 10 : 250}
                               disabled={saving}
                               onChange={(event) => changeField(column.key, event.target.value)}
                               onKeyDown={(event) => {

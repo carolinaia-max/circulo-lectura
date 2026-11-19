@@ -34,7 +34,7 @@ const campos: {
 }[] = [
   { key: "titulo", label: "Título", span: 4, placeholder: "Título del libro", destacado: true },
   { key: "autor", label: "Autor", span: 2, placeholder: "Nombre del autor" },
-  { key: "isbn", label: "ISBN", span: 2, placeholder: "CLUB-007" },
+  { key: "isbn", label: "ISBN", span: 2, placeholder: "978-84-376-0494-7" },
   { key: "genero", label: "Género", span: 2, placeholder: "Novela, ensayo…" },
   { key: "anio_publicacion", label: "Año", span: 1, placeholder: String(currentYear), numero: true },
   { key: "paginas", label: "Páginas", span: 1, placeholder: "0", numero: true },
@@ -141,11 +141,9 @@ export default function BookForm({
                 className={["entrada", "entrada--caja", campo.destacado ? "entrada--destacada" : "", campo.numero ? "numeros" : ""]
                   .filter(Boolean)
                   .join(" ")}
-                type={campo.numero ? "number" : "text"}
-                min={campo.key === "paginas" ? 1 : undefined}
-                max={campo.key === "anio_publicacion" ? currentYear : undefined}
-                step={campo.numero ? 1 : undefined}
-                maxLength={campo.numero ? undefined : 250}
+                type="text"
+                inputMode={campo.numero ? "numeric" : undefined}
+                maxLength={campo.numero ? 10 : 250}
                 placeholder={campo.placeholder}
                 value={values[campo.key]}
                 required
