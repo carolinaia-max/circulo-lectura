@@ -36,7 +36,7 @@ export default function LoginPage() {
     const formElement = event.currentTarget;
     const form = new FormData(formElement);
     const email = String(form.get("email") ?? "").trim();
-    const password = String(form.get("password") ?? "");
+    const password = String(form.get("password") ?? "").replace(/\s/g, "");
 
     marcar(null);
 

@@ -32,8 +32,8 @@ export default function RegistroPage() {
     const form = new FormData(formElement);
     const name = String(form.get("name") ?? "").trim();
     const email = String(form.get("email") ?? "").trim();
-    const password = String(form.get("password") ?? "");
-
+    const password = String(form.get("password") ?? "").replace(/\s/g, "");    
+    
     marcar(null);
 
     const vacios = [!name && "name", !email && "email", !password && "password"].filter(
