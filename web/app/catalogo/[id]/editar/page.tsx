@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import BookForm, { type Book } from "../../BookForm";
+import BookForm, { type Book } from "../../BookFormC";
 import { fetchCatalog } from "../../catalogApi";
 
 export default async function EditarLibroPage({

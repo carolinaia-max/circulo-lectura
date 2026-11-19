@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import type { Book } from "../BookForm";
+import type { Book } from "../BookFormC";
 import { fetchCatalog } from "../catalogApi";
 import DeleteBookButton from "./DeleteBookButton";
 

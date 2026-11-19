@@ -14,7 +14,7 @@ export type Book = {
   sinopsis: string | null;
 };
 
-export default function BookForm({ book }: { book?: Book }) {
+export default function BookForm({ book, onCreated, onCancel }: { book?: Book; onCreated?: (created: Book) => void; onCancel?: () => void }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -58,7 +58,11 @@ export default function BookForm({ book }: { book?: Book }) {
         return;
       }
 
-      window.location.assign(`/catalogo/${data.id}`);
+      if (!book && onCreated) {
+        onCreated(data as Book);
+      } else {
+        window.location.assign(`/catalogo/${data.id}`);
+      }
     } catch {
       setError("No se pudo conectar con la API. Intenta de nuevo.");
     } finally {
@@ -111,7 +115,11 @@ export default function BookForm({ book }: { book?: Book }) {
         <button type="submit" disabled={loading}>
           {loading ? "Guardando…" : "Guardar libro"}
         </button>{" "}
-        <Link href={book ? `/catalogo/${book.id}` : "/catalogo"}>Cancelar</Link>
+        {onCancel ? (
+          <button type="button" onClick={onCancel} disabled={loading}>Cancelar</button>
+        ) : (
+          <Link href={book ? `/catalogo/${book.id}` : "/catalogo"}>Cancelar</Link>
+        )}
       </p>
     </form>
   );

@@ -1,4 +1,4 @@
-import BookForm from "../BookForm";
+import BookForm from "../BookFormC";
 import { fetchCatalog } from "../catalogApi";
 
 export default async function NuevoLibroPage() {

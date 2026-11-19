@@ -4,6 +4,9 @@
   --foreground: #111111;
   --border: #111111;
   --muted: #666666;
+  --accent: #facc15;
+  --accent-hover: #eab308;
+  --accent-text: #111111;
 }
 
 * {
@@ -54,7 +57,120 @@ a:hover {
   text-underline-offset: 3px;
 }
 
-/* TABLAS */
+/* =====================================
+   ENCABEZADO DEL CATALOGO
+   ===================================== */
+
+.catalog-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 32px;
+  margin-bottom: 72px;
+}
+
+.catalog-eyebrow {
+  margin-bottom: 18px;
+  color: #777777;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 2px;
+}
+
+.catalog-header h1 {
+  margin-bottom: 14px;
+}
+
+.catalog-description {
+  max-width: 550px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.catalog-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.catalog-actions form {
+  margin: 0;
+}
+
+.catalog-actions button {
+  background: var(--accent);
+  color: var(--accent-text);
+  border: 1px solid var(--accent);
+  padding: 10px 16px;
+  font-size: 12px;
+}
+
+.catalog-actions button:hover:not(:disabled) {
+  background: var(--accent-hover);
+  color: var(--accent-text);
+  border-color: var(--accent-hover);
+}
+
+/* =====================================
+   SECCION DEL CATALOGO
+   ===================================== */
+
+.catalog-section {
+  width: 100%;
+}
+
+.catalog-toolbar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.catalog-toolbar h2 {
+  margin: 0 0 8px;
+}
+
+.catalog-count {
+  margin: 0;
+  color: #777777;
+  font-size: 12px;
+}
+
+.catalog-add-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 10px 18px;
+  background: var(--accent);
+  color: var(--accent-text);
+  border: 1px solid var(--accent);
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.catalog-add-button:hover {
+  background: var(--accent-hover);
+  color: var(--accent-text);
+  border-color: var(--accent-hover);
+  text-decoration: none;
+}
+
+.catalog-empty {
+  margin-top: 32px;
+  padding: 32px 0;
+  border-top: 1px solid #dddddd;
+  color: #777777;
+}
+
+/* =====================================
+   TABLAS GENERALES
+   ===================================== */
 
 table {
   width: 100%;
@@ -83,12 +199,14 @@ tbody tr:hover {
   background: #f7f7f7;
 }
 
-/* BOTONES */
+/* =====================================
+   BOTONES GENERALES
+   ===================================== */
 
 button {
-  background: #111111;
-  color: #ffffff;
-  border: 1px solid #111111;
+  background: var(--accent);
+  color: var(--accent-text);
+  border: 1px solid var(--accent);
   border-radius: 0;
   padding: 11px 20px;
   font: inherit;
@@ -97,8 +215,9 @@ button {
 }
 
 button:hover:not(:disabled) {
-  background: #ffffff;
-  color: #111111;
+  background: var(--accent-hover);
+  color: var(--accent-text);
+  border-color: var(--accent-hover);
 }
 
 button:disabled {
@@ -106,7 +225,9 @@ button:disabled {
   cursor: not-allowed;
 }
 
-/* FORMULARIOS */
+/* =====================================
+   FORMULARIOS GENERALES
+   ===================================== */
 
 form {
   max-width: 560px;
@@ -120,7 +241,8 @@ label {
 }
 
 input,
-textarea {
+textarea,
+select {
   width: 100%;
   padding: 12px 14px;
   border: 1px solid #111111;
@@ -143,14 +265,478 @@ form p {
   color: #a00000;
 }
 
+/* =====================================
+   CONTENEDOR DE TABLA INTERACTIVA
+   ===================================== */
+
+.interactive-table {
+  position: relative;
+  width: 100%;
+  margin-top: 24px;
+  overflow: visible;
+}
+
+.interactive-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.interactive-table table {
+  width: 100%;
+  margin: 0;
+  border-collapse: collapse;
+}
+
+.interactive-table th,
+.interactive-table td {
+  vertical-align: middle;
+}
+
+/* =====================================
+   FILAS INTERACTIVAS
+   ===================================== */
+
+.interactive-row {
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.interactive-row:hover,
+.interactive-row.row-selected {
+  background: #f5f5f5;
+}
+
+.interactive-row.row-editing {
+  background: #fafafa;
+}
+
+/* =====================================
+   TITULOS DE LOS LIBROS
+   ===================================== */
+
+.book-title-button {
+  display: inline;
+  background: transparent;
+  border: none;
+  color: #111111;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+}
+
+.book-title-button:hover:not(:disabled) {
+  background: transparent;
+  color: #111111;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.book-title-button:focus-visible {
+  outline: 2px solid #111111;
+  outline-offset: 4px;
+}
+
+/* =====================================
+   LAPIZ PARA EDITAR LIBROS
+   ===================================== */
+
+.table-edit-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 6px;
+  background: transparent;
+  border: none;
+  color: #888888;
+  cursor: pointer;
+}
+
+.table-edit-button:hover:not(:disabled) {
+  color: #111111;
+  background: #eeeeee;
+}
+
+.table-edit-button:focus-visible {
+  outline: 2px solid #111111;
+  outline-offset: 2px;
+}
+
+.table-edit-button svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* =====================================
+   CAMPOS EDITABLES DE LA TABLA
+   ===================================== */
+
+.table-edit-input {
+  width: 100%;
+  min-width: 75px;
+  padding: 9px 7px;
+  border: 1px solid #999999;
+  border-radius: 0;
+  background: #ffffff;
+  color: #111111;
+  font: inherit;
+  font-size: 13px;
+}
+
+.table-edit-input:focus {
+  outline: 1px solid #111111;
+  border-color: #111111;
+}
+
+/* =====================================
+   GUARDAR Y CANCELAR EDICION
+   ===================================== */
+
+.table-save-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+}
+
+.table-save-button {
+  background: var(--accent);
+  color: var(--accent-text);
+  border: 1px solid var(--accent);
+  padding: 8px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.table-save-button:hover:not(:disabled) {
+  background: var(--accent-hover);
+  color: var(--accent-text);
+  border-color: var(--accent-hover);
+}
+
+.table-cancel-button {
+  background: transparent;
+  color: #777777;
+  border: none;
+  padding: 5px 2px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.table-cancel-button:hover:not(:disabled) {
+  background: transparent;
+  color: #111111;
+  text-decoration: underline;
+}
+
+.catalog-error {
+  color: #a21d1d;
+  font-size: 13px;
+  margin-top: 12px;
+}
+
+/* =====================================
+   ACCESIBILIDAD
+   ===================================== */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* =====================================
+   FONDO DEL MODAL DE SINOPSIS
+   ===================================== */
+
+.book-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+
+.book-modal {
+  position: relative;
+  width: 100%;
+  max-width: 580px;
+  max-height: 85vh;
+  overflow-y: auto;
+  background: #ffffff;
+  color: #111111;
+  padding: 48px;
+  box-shadow: 0 16px 50px rgba(0, 0, 0, 0.12);
+}
+
+.book-modal-close {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  background: transparent;
+  color: #777777;
+  border: none;
+  padding: 4px 8px;
+  font-size: 30px;
+  font-weight: 300;
+  cursor: pointer;
+}
+
+.book-modal-close:hover:not(:disabled) {
+  background: transparent;
+  color: #111111;
+}
+
+.book-modal-eyebrow {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  margin-bottom: 24px;
+}
+
+.book-modal h2 {
+  font-size: clamp(25px, 4vw, 36px);
+  font-weight: 400;
+  line-height: 1.2;
+  margin-bottom: 12px;
+}
+
+.book-modal-author {
+  color: #777777;
+  font-size: 14px;
+}
+
+.book-modal-divider {
+  height: 1px;
+  background: #dddddd;
+  margin: 30px 0;
+}
+
+.book-modal-synopsis {
+  font-size: 15px;
+  line-height: 1.9;
+  white-space: pre-wrap;
+}
+
+
+.synopsis-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.synopsis-question {
+  margin: 8px 0 20px;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.synopsis-add-button,
+.synopsis-save-button {
+  background: var(--accent);
+  color: var(--accent-text);
+  border: 1px solid var(--accent);
+  padding: 11px 18px;
+  font-size: 13px;
+}
+
+.synopsis-add-button:hover:not(:disabled),
+.synopsis-save-button:hover:not(:disabled) {
+  background: var(--accent-hover);
+  color: var(--accent-text);
+  border-color: var(--accent-hover);
+}
+
+
+.synopsis-editor {
+  width: 100%;
+}
+
+.synopsis-editor label {
+  display: block;
+  margin-bottom: 12px;
+}
+
+.synopsis-editor textarea {
+  display: block;
+  width: 100%;
+  min-height: 170px;
+  padding: 14px;
+  border: 1px solid #999999;
+  border-radius: 0;
+  background: #ffffff;
+  color: #111111;
+  resize: vertical;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.synopsis-editor textarea:focus {
+  outline: 1px solid #111111;
+  border-color: #111111;
+}
+
+.synopsis-character-count {
+  margin: 8px 0 20px;
+  text-align: right;
+  color: #777777;
+  font-size: 11px;
+}
+
+
+.synopsis-editor-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.synopsis-cancel-button {
+  background: transparent;
+  color: #777777;
+  border: none;
+  padding: 10px;
+  font-size: 13px;
+}
+
+.synopsis-cancel-button:hover:not(:disabled) {
+  background: transparent;
+  color: #111111;
+  text-decoration: underline;
+}
+
 @media (max-width: 768px) {
   main {
     width: calc(100% - 32px);
     margin: 32px auto;
-    overflow-x: auto;
   }
 
-  table {
-    min-width: 700px;
+  .catalog-header {
+    flex-direction: column;
+    gap: 20px;
+    margin-bottom: 48px;
   }
+
+  .catalog-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .interactive-table table {
+    min-width: 850px;
+  }
+
+}
+
+
+@media (max-width: 600px) {
+  h1 {
+    font-size: 30px;
+  }
+
+  h2 {
+    font-size: 20px;
+  }
+
+  .catalog-add-button {
+    width: 100%;
+  }
+
+  .book-modal {
+    padding: 40px 24px 28px;
+  }
+
+  .book-modal-overlay {
+    padding: 16px;
+  }
+
+  .synopsis-editor-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .synopsis-save-button,
+  .synopsis-cancel-button {
+    width: 100%;
+  }
+}
+
+.table-delete-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 6px;
+  background: transparent;
+  color: #888888;
+  border: none;
+  cursor: pointer;
+}
+
+.table-delete-button:hover:not(:disabled) {
+  background: #fff0f0;
+  color: #a21d1d;
+}
+
+.table-delete-button:focus-visible {
+  outline: 2px solid #a21d1d;
+  outline-offset: 2px;
+}
+
+.table-delete-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+/* Columna de acciones visible en cada fila */
+.interactive-table th.book-actions-heading,
+.interactive-table td.book-actions-cell {
+  text-align: center;
+  width: 150px;
+  min-width: 150px;
+  white-space: nowrap;
+}
+.book-row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.book-row-save-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.book-row-save-actions button {
+  padding: 8px 10px;
+  font-size: 12px;
+}
+
+
+.add-book-modal {
+  max-height: min(90vh, 900px);
+  overflow-y: auto;
+  width: min(600px, calc(100vw - 32px));
+}
+.add-book-modal form { max-width: none; }
+.add-book-modal form p { margin-bottom: 14px; }
+.add-book-modal form input, .add-book-modal form textarea { padding: 9px 12px; }
+.add-book-modal .book-modal-close { position: sticky; top: 0; float: right; 
 }
