@@ -1,57 +1,48 @@
 import LogoutButton from "./LogoutButton";
-import CatalogoInteractivo, {
-  type Book,
-} from "./CatalogoInteractivo";
+import CatalogoInteractivo, { type Book } from "./CatalogoInteractivo";
 import { fetchCatalog } from "./catalogApi";
 
+// Correo del usuario para la barra superior. Si no se puede obtener,
+// la barra muestra solo "Cerrar sesión".
+async function getUserEmail(): Promise<string | null> {
+  const response = await fetchCatalog("/auth/me");
+  if (!response?.ok) return null;
+
+  const user: unknown = await response.json().catch(() => null);
+  const email = (user as { email?: unknown } | null)?.email;
+
+  return typeof email === "string" ? email : null;
+}
+
 export default async function CatalogoPage() {
-  // Obtener los libros desde FastAPI
-  const response = await fetchCatalog("/books");
-
-  // Mostrar un mensaje si no se puede cargar el catálogo
-  if (!response?.ok) {
-    return (
-      <main>
-        <h1>Mi biblioteca</h1>
-
-        <p role="alert">
-          No se pudo cargar el catálogo.
-          Revisa que FastAPI esté funcionando
-          y recarga la página.
-        </p>
-      </main>
-    );
-  }
-
-  // Convertir la respuesta en una lista de libros
-  const books: Book[] = await response.json();
+  // Obtener los libros y el usuario desde FastAPI
+  const [response, email] = await Promise.all([
+    fetchCatalog("/books"),
+    getUserEmail(),
+  ]);
 
   return (
-    <main>
-      {/* ENCABEZADO PRINCIPAL */}
-      <header className="catalog-header">
-        <div>
-          <p className="catalog-eyebrow">
-            CÍRCULO DE LECTURA
-          </p>
-
-          <h1>Mi biblioteca</h1>
-
-          <p className="catalog-description">
-            Un espacio para descubrir, organizar
-            y explorar tus lecturas.
-          </p>
-        </div>
-
-        <div className="catalog-actions">
+    <>
+      <header className="barra">
+        <nav aria-label="Sesión" className="barra-nav">
+          {email && <span className="barra-correo">{email}</span>}
           <LogoutButton />
-        </div>
+        </nav>
       </header>
 
-      {/* SECCIÓN DEL CATÁLOGO */}
-      <section className="catalog-section">
-        <CatalogoInteractivo initialBooks={books} />
-      </section>
-    </main>
+      {response?.ok ? (
+        <CatalogoInteractivo initialBooks={(await response.json()) as Book[]} />
+      ) : (
+        <main className="catalogo">
+          <section className="catalogo-cabecera">
+            <h1>Catálogo</h1>
+          </section>
+          <p role="alert" className="mensaje-error catalogo-aviso">
+            No se pudo cargar el catálogo. Revisa que FastAPI esté funcionando y
+            recarga la página.
+          </p>
+        </main>
+      )}
+    </>
   );
 }

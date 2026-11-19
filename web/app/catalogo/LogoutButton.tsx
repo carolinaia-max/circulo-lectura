@@ -27,11 +27,20 @@ export default function LogoutButton() {
   }
 
   return (
-    <div>
-      <button type="button" onClick={closeSession} disabled={loading}>
+    <div className="salir">
+      <button
+        type="button"
+        className="boton-salir"
+        onClick={closeSession}
+        disabled={loading}
+      >
         {loading ? "Cerrando sesión…" : "Cerrar sesión"}
       </button>
-      {error && <p role="alert">{error}</p>}
+      {error && (
+        <p role="alert" className="mensaje-error">
+          {error}
+        </p>
+      )}
     </div>
   );
 }

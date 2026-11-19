@@ -1,4 +1,4 @@
-import BookForm from "../BookFormC";
+import BookForm from "../BookForm";
 import { fetchCatalog } from "../catalogApi";
 
 export default async function NuevoLibroPage() {
@@ -6,7 +6,7 @@ export default async function NuevoLibroPage() {
 
   if (!response?.ok) {
     return (
-      <main>
+      <main className="pagina-simple">
         <h1>Agregar libro</h1>
         <p role="alert">No se pudo verificar la sesión. Intenta de nuevo.</p>
       </main>
@@ -14,7 +14,7 @@ export default async function NuevoLibroPage() {
   }
 
   return (
-    <main>
+    <main className="pagina-simple">
       <h1>Agregar libro</h1>
       <BookForm />
     </main>

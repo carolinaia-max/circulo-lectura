@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import BookForm, { type Book } from "../../BookFormC";
+import BookForm, { type Book } from "../../BookForm";
 import { fetchCatalog } from "../../catalogApi";
 
 export default async function EditarLibroPage({
@@ -20,7 +20,7 @@ export default async function EditarLibroPage({
           : "No se pudo cargar el libro para editarlo.";
 
     return (
-      <main>
+      <main className="pagina-simple">
         <h1>Editar libro</h1>
         <p role="alert">{message}</p>
         <Link href="/catalogo">Volver al catálogo</Link>
@@ -31,7 +31,7 @@ export default async function EditarLibroPage({
   const book: Book = await response.json();
 
   return (
-    <main>
+    <main className="pagina-simple">
       <h1>Editar libro</h1>
       <BookForm book={book} />
     </main>
