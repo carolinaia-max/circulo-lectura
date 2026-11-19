@@ -140,8 +140,16 @@ export function validateBook(
 
   // 2) Reglas de valor, solo en campos con caracteres válidos
   const isbn = values.isbn.trim();
-  if (!conCaracteresMalos.has("isbn") && otrosIsbn.includes(isbn)) {
-    errores.push({ campo: "isbn", mensaje: "Ya existe un libro con ese ISBN.", caracteres: 0 });
+  if (!conCaracteresMalos.has("isbn")) {
+    if (!/[0-9]/.test(isbn)) {
+      errores.push({
+        campo: "isbn",
+        mensaje: "El ISBN debe tener al menos un número.",
+        caracteres: 0,
+      });
+    } else if (otrosIsbn.includes(isbn)) {
+      errores.push({ campo: "isbn", mensaje: "Ya existe un libro con ese ISBN.", caracteres: 0 });
+    }
   }
 
   if (
