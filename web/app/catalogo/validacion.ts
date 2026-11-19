@@ -31,12 +31,45 @@ const OBLIGATORIOS: CampoLibro[] = [
   "paginas",
 ];
 
+// OPCIONES DE GÉNERO Y AÑO
+// El género y el año no se escriben: se eligen de estas listas.
+
+export const GENEROS = [
+  "Fantasía",
+  "Ciencia ficción",
+  "Thriller",
+  "Romance",
+  "Terror",
+  "Novela histórica",
+  "Aventuras",
+  "Infantil/Juvenil",
+];
+
+// Años disponibles: del actual hacia atrás hasta la imprenta de Gutenberg.
+export const ANIO_MINIMO = 1450;
+
+export function aniosDisponibles(): string[] {
+  const actual = new Date().getFullYear();
+  return Array.from({ length: actual - ANIO_MINIMO + 1 }, (_, i) => String(actual - i));
+}
+
+// Texto sin acentos ni mayúsculas, para comparar y buscar.
+export function sinAcentos(texto: string): string {
+  return texto.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().trim();
+}
+
+// Si un género guardado coincide con una opción salvo por mayúsculas o
+// acentos (por ejemplo "fantasia"), se usa la opción de la lista.
+export function generoDeLista(genero: string): string {
+  return GENEROS.find((opcion) => sinAcentos(opcion) === sinAcentos(genero)) ?? genero;
+}
+
 export function borradorDesdeLibro(book?: Book): BorradorLibro {
   return {
     titulo: book?.titulo ?? "",
     autor: book?.autor ?? "",
     isbn: book?.isbn ?? "",
-    genero: book?.genero ?? "",
+    genero: book ? generoDeLista(book.genero) : "",
     anio_publicacion: book ? String(book.anio_publicacion) : "",
     paginas: book ? String(book.paginas) : "",
   };
@@ -61,11 +94,9 @@ const PERMITIDOS: Partial<Record<CampoLibro, RegExp>> = {
   autor: /[\p{L}\p{M} '’.-]/u,
   // ISBN: números del 0 al 9, guion, X o x y espacios.
   isbn: /[0-9Xx -]/,
-  // Género: letras (con acentos y diéresis) y espacios.
-  genero: /[\p{L}\p{M} ]/u,
-  // Año y páginas: solo dígitos.
-  anio_publicacion: /[0-9]/,
+  // Páginas: solo dígitos.
   paginas: /[0-9]/,
+  // Género y año se eligen de una lista (ver validateBook).
 };
 
 const LETRA = /\p{L}/u;
@@ -152,13 +183,16 @@ export function validateBook(
     }
   }
 
-  if (
-    !conCaracteresMalos.has("anio_publicacion") &&
-    Number(values.anio_publicacion) > new Date().getFullYear()
-  ) {
+  // Género y año: solo valores de la lista. Un libro antiguo puede traer
+  // otro valor; para guardarlo hay que elegir uno de la lista.
+  if (!GENEROS.includes(values.genero)) {
+    errores.push({ campo: "genero", mensaje: "Elige un género de la lista.", caracteres: 0 });
+  }
+
+  if (!aniosDisponibles().includes(values.anio_publicacion.trim())) {
     errores.push({
       campo: "anio_publicacion",
-      mensaje: "El año de publicación no puede ser futuro.",
+      mensaje: "Elige un año de la lista.",
       caracteres: 0,
     });
   }

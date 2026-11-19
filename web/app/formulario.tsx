@@ -8,6 +8,7 @@ import {
   type InputHTMLAttributes,
   type KeyboardEvent,
   type ReactNode,
+  type SelectHTMLAttributes,
   type RefObject,
 } from "react";
 
@@ -249,6 +250,60 @@ export function EntradaResaltada({
           {partes}
         </span>
       )}
+    </span>
+  );
+}
+
+// MENÚ DESPLEGABLE
+// Un <select> con el estilo de los campos. Si el valor actual no está en
+// la lista (un libro antiguo con otro género o año), se muestra como opción
+// deshabilitada para que se vea qué tenía y haya que elegir uno válido.
+export function Selector({
+  opciones,
+  placeholder,
+  value,
+  className,
+  ...props
+}: Omit<SelectHTMLAttributes<HTMLSelectElement>, "value"> & {
+  opciones: string[];
+  placeholder: string;
+  value: string;
+}) {
+  const fueraDeLista = value !== "" && !opciones.includes(value);
+  const clases = ["entrada", "selector-campo", value === "" ? "selector-vacio" : "", className ?? ""]
+    .filter(Boolean)
+    .join(" ");
+
+  return (
+    <span className="selector">
+      <select value={value} className={clases} {...props}>
+        <option value="" disabled>
+          {placeholder}
+        </option>
+        {fueraDeLista && (
+          <option value={value} disabled>
+            {value} (no está en la lista)
+          </option>
+        )}
+        {opciones.map((opcion) => (
+          <option key={opcion} value={opcion}>
+            {opcion}
+          </option>
+        ))}
+      </select>
+      <svg
+        aria-hidden="true"
+        focusable="false"
+        className="selector-flecha"
+        width="14"
+        height="9"
+        viewBox="0 0 14 9"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
+        <path d="M1 1l6 6 6-6" />
+      </svg>
     </span>
   );
 }

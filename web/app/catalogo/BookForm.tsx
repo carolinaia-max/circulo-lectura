@@ -7,12 +7,15 @@ import {
   Campo,
   EntradaResaltada,
   MensajeError,
+  Selector,
   enfocarCampo,
   leerErrorApi,
   useErroresDeCampos,
   type ErrorDeCampos,
 } from "../formulario";
 import {
+  GENEROS,
+  aniosDisponibles,
   borradorDesdeLibro,
   caracteresInvalidos,
   libroDesdeBorrador,
@@ -24,8 +27,6 @@ import {
 
 export type { Book } from "./validacion";
 
-const currentYear = new Date().getFullYear();
-
 const campos: {
   key: CampoLibro;
   label: string;
@@ -33,12 +34,14 @@ const campos: {
   placeholder: string;
   numero?: boolean;
   destacado?: boolean;
+  // Si tiene opciones, el campo es un menú desplegable.
+  opciones?: () => string[];
 }[] = [
   { key: "titulo", label: "Título", span: 4, placeholder: "Título del libro", destacado: true },
   { key: "autor", label: "Autor", span: 2, placeholder: "Nombre del autor" },
   { key: "isbn", label: "ISBN", span: 2, placeholder: "978-84-376-0494-7" },
-  { key: "genero", label: "Género", span: 2, placeholder: "Novela, ensayo…" },
-  { key: "anio_publicacion", label: "Año", span: 1, placeholder: String(currentYear), numero: true },
+  { key: "genero", label: "Género", span: 2, placeholder: "Elige un género", opciones: () => GENEROS },
+  { key: "anio_publicacion", label: "Año", span: 1, placeholder: "Año", numero: true, opciones: aniosDisponibles },
   { key: "paginas", label: "Páginas", span: 1, placeholder: "0", numero: true },
 ];
 
@@ -141,24 +144,38 @@ export default function BookForm({
               invalido={tieneError(campo.key)}
               className={`span-${campo.span}`}
             >
-              <EntradaResaltada
-                resaltar={
-                  tieneError(campo.key) ? caracteresInvalidos(campo.key, values[campo.key]) : []
-                }
-                id={id}
-                name={campo.key}
-                className={["entrada", "entrada--caja", campo.destacado ? "entrada--destacada" : "", campo.numero ? "numeros" : ""]
-                  .filter(Boolean)
-                  .join(" ")}
-                type="text"
-                inputMode={campo.numero ? "numeric" : undefined}
-                maxLength={campo.numero ? 10 : 250}
-                placeholder={campo.placeholder}
-                value={values[campo.key]}
-                required
-                onChange={(event) => change(campo.key, event.target.value)}
-                {...aria(campo.key)}
-              />
+              {campo.opciones ? (
+                <Selector
+                  id={id}
+                  name={campo.key}
+                  className={["entrada--caja", campo.numero ? "numeros" : ""].join(" ")}
+                  opciones={campo.opciones()}
+                  placeholder={campo.placeholder}
+                  value={values[campo.key]}
+                  required
+                  onChange={(event) => change(campo.key, event.target.value)}
+                  {...aria(campo.key)}
+                />
+              ) : (
+                <EntradaResaltada
+                  resaltar={
+                    tieneError(campo.key) ? caracteresInvalidos(campo.key, values[campo.key]) : []
+                  }
+                  id={id}
+                  name={campo.key}
+                  className={["entrada", "entrada--caja", campo.destacado ? "entrada--destacada" : "", campo.numero ? "numeros" : ""]
+                    .filter(Boolean)
+                    .join(" ")}
+                  type="text"
+                  inputMode={campo.numero ? "numeric" : undefined}
+                  maxLength={campo.numero ? 10 : 250}
+                  placeholder={campo.placeholder}
+                  value={values[campo.key]}
+                  required
+                  onChange={(event) => change(campo.key, event.target.value)}
+                  {...aria(campo.key)}
+                />
+              )}
             </Campo>
           );
         })}

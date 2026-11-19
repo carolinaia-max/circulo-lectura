@@ -206,6 +206,100 @@ button:disabled {
   color: #ffffff;
 }
 
+/* Menú desplegable (género y año): mismo estilo que los campos,
+   con una flecha a la derecha. */
+
+.selector {
+  position: relative;
+  display: block;
+  min-width: 0;
+}
+
+.entrada.selector-campo {
+  padding-right: 32px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.entrada--fila.selector-campo {
+  padding-right: 26px;
+}
+
+.selector-campo option {
+  color: var(--tinta);
+  font-weight: 400;
+}
+
+.entrada.selector-vacio {
+  color: var(--placeholder);
+}
+
+.selector-flecha {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  color: var(--tinta);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.entrada--fila + .selector-flecha {
+  right: 6px;
+}
+
+/* Búsqueda del catálogo */
+
+.busqueda {
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 20px;
+  padding-top: clamp(10px, 2.2vh, 24px);
+}
+
+.busqueda-campo {
+  position: relative;
+  display: block;
+  flex: 1 1 280px;
+  max-width: 520px;
+}
+
+.busqueda-campo .entrada {
+  height: 44px;
+  padding: 8px 44px 8px 30px;
+  font-size: 17px;
+}
+
+.busqueda-campo .entrada::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.icono-lupa {
+  position: absolute;
+  top: 50%;
+  left: 2px;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.busqueda-limpiar {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+}
+
+.busqueda-resultado {
+  margin: 0;
+  color: var(--gris);
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+
 .entrada[type="number"] {
   -moz-appearance: textfield;
 }

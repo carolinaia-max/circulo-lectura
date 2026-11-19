@@ -13,17 +13,20 @@ export function IlustracionLectora() {
       focusable="false"
       className="arte-svg"
       viewBox="170 200 600 650"
-      preserveAspectRatio="xMidYMid slice"
+      // "meet" muestra siempre la ilustración completa (como en la maqueta).
+      // El fondo rojo y la retícula se extienden más allá del viewBox para
+      // cubrir el panel cuando su proporción es distinta.
+      preserveAspectRatio="xMidYMid meet"
     >
       <defs>
         <clipPath id="globo">
           <circle cx="470" cy="880" r="170" />
         </clipPath>
       </defs>
-      <rect x="0" y="0" width="1000" height="1100" fill={ROJO} />
-      <line x1="266" y1="0" x2="266" y2="900" stroke={BLANCO} strokeOpacity="0.35" strokeWidth="1" />
-      <line x1="533" y1="0" x2="533" y2="900" stroke={BLANCO} strokeOpacity="0.35" strokeWidth="1" />
-      <line x1="0" y1="300" x2="800" y2="300" stroke={BLANCO} strokeOpacity="0.35" strokeWidth="1" />
+      <rect x="-2000" y="-2000" width="5000" height="5000" fill={ROJO} />
+      <line x1="266" y1="-2000" x2="266" y2="900" stroke={BLANCO} strokeOpacity="0.35" strokeWidth="1" />
+      <line x1="533" y1="-2000" x2="533" y2="900" stroke={BLANCO} strokeOpacity="0.35" strokeWidth="1" />
+      <line x1="-2000" y1="300" x2="3000" y2="300" stroke={BLANCO} strokeOpacity="0.35" strokeWidth="1" />
       <circle cx="680" cy="290" r="22" fill={BLANCO} />
       <circle cx="680" cy="290" r="40" fill="none" stroke={BLANCO} strokeWidth="2" />
       <circle cx="470" cy="880" r="170" fill={TINTA} />
@@ -154,6 +157,15 @@ export function IconoMas() {
   return (
     <svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="2.5">
       <path d="M9 0v18M0 9h18" />
+    </svg>
+  );
+}
+
+export function IconoLupa() {
+  return (
+    <svg aria-hidden="true" focusable="false" className="icono-lupa" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
+      <circle cx="8.5" cy="8.5" r="6.5" />
+      <path d="M13.5 13.5L19 19" />
     </svg>
   );
 }

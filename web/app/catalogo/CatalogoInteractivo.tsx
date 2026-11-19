@@ -7,6 +7,7 @@ import {
   EntradaResaltada,
   ErrorApi,
   MensajeError,
+  Selector,
   enfocarCampo,
   leerErrorApi,
   useErroresDeCampos,
@@ -16,11 +17,15 @@ import {
   IconoBasura,
   IconoCerrar,
   IconoLapiz,
+  IconoLupa,
   IconoMas,
   IlustracionNuevoLibro,
 } from "../ilustraciones";
 import {
+  GENEROS,
+  aniosDisponibles,
   borradorDesdeLibro,
+  sinAcentos,
   caracteresInvalidos,
   libroDesdeBorrador,
   validateBook,
@@ -41,11 +46,13 @@ const columns: {
   label: string;
   numero?: boolean;
   secundario?: boolean;
+  // Si tiene opciones, al editar es un menú desplegable.
+  opciones?: () => string[];
 }[] = [
   { key: "titulo", label: "Título" },
   { key: "autor", label: "Autor" },
-  { key: "genero", label: "Género" },
-  { key: "anio_publicacion", label: "Año", numero: true },
+  { key: "genero", label: "Género", opciones: () => GENEROS },
+  { key: "anio_publicacion", label: "Año", numero: true, opciones: aniosDisponibles },
   { key: "paginas", label: "Páginas", numero: true },
   { key: "isbn", label: "ISBN", secundario: true },
 ];
@@ -81,6 +88,8 @@ export default function CatalogoInteractivo({ initialBooks }: Props) {
   const [deleteError, setDeleteError] = useState("");
 
   const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
+  const searchRef = useRef<HTMLInputElement>(null);
 
   const requestRef = useRef(0);
   const addDialogRef = useRef<HTMLDivElement>(null);
@@ -406,6 +415,26 @@ export default function CatalogoInteractivo({ initialBooks }: Props) {
 
   const rowLocked = editingId !== null || deleting;
 
+  // BÚSQUEDA
+  // Cada palabra buscada debe aparecer en el título, autor, género, año o
+  // ISBN, sin importar mayúsculas ni acentos. La fila en edición siempre
+  // se muestra.
+  const terms = sinAcentos(search).split(/\s+/).filter(Boolean);
+  const visibleBooks = terms.length
+    ? books.filter((book) => {
+        if (book.id === editingId) return true;
+        const text = sinAcentos(
+          [book.titulo, book.autor, book.genero, book.anio_publicacion, book.isbn].join(" "),
+        );
+        return terms.every((term) => text.includes(term));
+      })
+    : books;
+
+  function clearSearch() {
+    setSearch("");
+    searchRef.current?.focus();
+  }
+
   return (
     <main className="catalogo">
       {/* ENCABEZADO */}
@@ -437,8 +466,61 @@ export default function CatalogoInteractivo({ initialBooks }: Props) {
         </div>
       )}
 
-      {/* TABLA DEL CATÁLOGO */}
+      {/* BÚSQUEDA */}
       {books.length > 0 && (
+        <div className="busqueda" role="search">
+          <label htmlFor="buscar-libro" className="etiqueta">
+            Buscar
+          </label>
+          <span className="busqueda-campo">
+            <IconoLupa />
+            <input
+              ref={searchRef}
+              id="buscar-libro"
+              type="search"
+              className="entrada"
+              placeholder="Título, autor, género, año o ISBN"
+              autoComplete="off"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Escape" && search) {
+                  event.preventDefault();
+                  setSearch("");
+                }
+              }}
+            />
+            {search && (
+              <button
+                type="button"
+                className="boton-icono busqueda-limpiar"
+                aria-label="Limpiar búsqueda"
+                onClick={clearSearch}
+              >
+                <IconoCerrar />
+              </button>
+            )}
+          </span>
+          <p className="busqueda-resultado" aria-live="polite">
+            {search.trim()
+              ? `${visibleBooks.length} de ${books.length} ${books.length === 1 ? "libro" : "libros"}`
+              : ""}
+          </p>
+        </div>
+      )}
+
+      {/* SIN RESULTADOS */}
+      {books.length > 0 && visibleBooks.length === 0 && (
+        <div className="catalogo-vacio">
+          <p>Ningún libro coincide con «{search.trim()}».</p>
+          <button type="button" className="boton-texto" onClick={clearSearch}>
+            Limpiar búsqueda
+          </button>
+        </div>
+      )}
+
+      {/* TABLA DEL CATÁLOGO */}
+      {visibleBooks.length > 0 && (
         <div className="tabla-scroll">
           <table className="tabla">
             <thead>
@@ -462,7 +544,7 @@ export default function CatalogoInteractivo({ initialBooks }: Props) {
             </thead>
 
             <tbody>
-              {books.map((book) => {
+              {visibleBooks.map((book) => {
                 const editing = editingId === book.id && draft !== null;
 
                 if (editing) {
@@ -479,32 +561,49 @@ export default function CatalogoInteractivo({ initialBooks }: Props) {
                               column.secundario ? "col-isbn" : "",
                             ].join(" ")}
                           >
-                            <EntradaResaltada
-                              resaltar={
-                                filaErrores.tieneError(column.key)
-                                  ? caracteresInvalidos(column.key, draft[column.key])
-                                  : []
-                              }
-                              id={id}
-                              aria-label={column.label}
-                              className={[
-                                "entrada",
-                                "entrada--fila",
-                                column.key === "titulo" ? "entrada--destacada" : "",
-                                column.numero ? "numeros derecha" : "",
-                              ].join(" ")}
-                              type="text"
-                              inputMode={column.numero ? "numeric" : undefined}
-                              value={draft[column.key]}
-                              maxLength={column.numero ? 10 : 250}
-                              disabled={saving}
-                              onChange={(event) => changeField(column.key, event.target.value)}
-                              onKeyDown={(event) => {
-                                if (event.key === "Enter") saveChanges();
-                                if (event.key === "Escape") cancelEditing();
-                              }}
-                              {...filaErrores.aria(column.key)}
-                            />
+                            {column.opciones ? (
+                              <Selector
+                                id={id}
+                                aria-label={column.label}
+                                className={["entrada--fila", column.numero ? "numeros" : ""].join(" ")}
+                                opciones={column.opciones()}
+                                placeholder={column.label}
+                                value={draft[column.key]}
+                                disabled={saving}
+                                onChange={(event) => changeField(column.key, event.target.value)}
+                                onKeyDown={(event) => {
+                                  if (event.key === "Escape") cancelEditing();
+                                }}
+                                {...filaErrores.aria(column.key)}
+                              />
+                            ) : (
+                              <EntradaResaltada
+                                resaltar={
+                                  filaErrores.tieneError(column.key)
+                                    ? caracteresInvalidos(column.key, draft[column.key])
+                                    : []
+                                }
+                                id={id}
+                                aria-label={column.label}
+                                className={[
+                                  "entrada",
+                                  "entrada--fila",
+                                  column.key === "titulo" ? "entrada--destacada" : "",
+                                  column.numero ? "numeros derecha" : "",
+                                ].join(" ")}
+                                type="text"
+                                inputMode={column.numero ? "numeric" : undefined}
+                                value={draft[column.key]}
+                                maxLength={column.numero ? 10 : 250}
+                                disabled={saving}
+                                onChange={(event) => changeField(column.key, event.target.value)}
+                                onKeyDown={(event) => {
+                                  if (event.key === "Enter") saveChanges();
+                                  if (event.key === "Escape") cancelEditing();
+                                }}
+                                {...filaErrores.aria(column.key)}
+                              />
+                            )}
                           </td>
                         );
                       })}
