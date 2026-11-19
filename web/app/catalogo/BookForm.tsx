@@ -3,37 +3,93 @@
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 
-export type Book = {
-  id: number;
-  isbn: string;
-  titulo: string;
-  autor: string;
-  genero: string;
-  anio_publicacion: number;
-  paginas: number;
-  sinopsis: string | null;
+import {
+  Campo,
+  EntradaResaltada,
+  MensajeError,
+  enfocarCampo,
+  leerErrorApi,
+  useErroresDeCampos,
+  type ErrorDeCampos,
+} from "../formulario";
+import {
+  borradorDesdeLibro,
+  caracteresInvalidos,
+  libroDesdeBorrador,
+  validateBook,
+  type Book,
+  type BorradorLibro,
+  type CampoLibro,
+} from "./validacion";
+
+export type { Book } from "./validacion";
+
+const currentYear = new Date().getFullYear();
+
+const campos: {
+  key: CampoLibro;
+  label: string;
+  span: 1 | 2 | 4;
+  placeholder: string;
+  numero?: boolean;
+  destacado?: boolean;
+}[] = [
+  { key: "titulo", label: "Título", span: 4, placeholder: "Título del libro", destacado: true },
+  { key: "autor", label: "Autor", span: 2, placeholder: "Nombre del autor" },
+  { key: "isbn", label: "ISBN", span: 2, placeholder: "978-84-376-0494-7" },
+  { key: "genero", label: "Género", span: 2, placeholder: "Novela, ensayo…" },
+  { key: "anio_publicacion", label: "Año", span: 1, placeholder: String(currentYear), numero: true },
+  { key: "paginas", label: "Páginas", span: 1, placeholder: "0", numero: true },
+];
+
+type Props = {
+  book?: Book;
+  onCreated?: (created: Book) => void;
+  onCancel?: () => void;
+  // ISBN de los demás libros, para avisar antes de llamar a la API.
+  existingIsbns?: string[];
+  idPrefix?: string;
 };
 
-export default function BookForm({ book }: { book?: Book }) {
+export default function BookForm({
+  book,
+  onCreated,
+  onCancel,
+  existingIsbns = [],
+  idPrefix = "libro-",
+}: Props) {
+  const [values, setValues] = useState<BorradorLibro>(() => borradorDesdeLibro(book));
+  const [sinopsis, setSinopsis] = useState(book?.sinopsis ?? "");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const errores = useErroresDeCampos(`${idPrefix}error`);
+  const { error, marcar, limpiarCampo, tieneError, aria } = errores;
+
+  function mostrar(nuevo: ErrorDeCampos) {
+    marcar(nuevo);
+    if (nuevo.campos[0]) enfocarCampo(`${idPrefix}${nuevo.campos[0]}`);
+  }
+
+  function change(field: CampoLibro, value: string) {
+    setValues((current) => ({ ...current, [field]: value }));
+    // Si al editar quedan caracteres inválidos, el campo sigue marcado y
+    // el resaltado se actualiza; si ya no quedan, se quita la marca.
+    if (!(tieneError(field) && caracteresInvalidos(field, value).length)) {
+      limpiarCampo(field);
+    }
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const form = new FormData(event.currentTarget);
+    if (loading) return;
 
-    const values = {
-      isbn: form.get("isbn"),
-      titulo: form.get("titulo"),
-      autor: form.get("autor"),
-      genero: form.get("genero"),
-      anio_publicacion: Number(form.get("anio_publicacion")),
-      paginas: Number(form.get("paginas")),
-      sinopsis: form.get("sinopsis"),
-    };
+    const validation = validateBook(values, existingIsbns);
+    if (validation) {
+      mostrar(validation);
+      return;
+    }
 
     setLoading(true);
-    setError("");
+    marcar(null);
 
     try {
       const response = await fetch(
@@ -41,7 +97,7 @@ export default function BookForm({ book }: { book?: Book }) {
         {
           method: book ? "PUT" : "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(values),
+          body: JSON.stringify({ ...libroDesdeBorrador(values), sinopsis: sinopsis.trim() }),
         },
       );
 
@@ -53,66 +109,99 @@ export default function BookForm({ book }: { book?: Book }) {
       const data = await response.json().catch(() => null);
 
       if (!response.ok) {
-        const message = data?.fields?.[0]?.mensaje ?? data?.detail;
-        setError(typeof message === "string" ? message : "No se pudo guardar el libro.");
+        const resultado = leerErrorApi(data, "No se pudo guardar el libro.");
+        if (response.status === 409) resultado.campos = ["isbn"];
+        mostrar(resultado);
         return;
       }
 
-      window.location.assign(`/catalogo/${data.id}`);
+      if (!book && onCreated) {
+        onCreated(data as Book);
+      } else {
+        window.location.assign(`/catalogo/${data.id}`);
+      }
     } catch {
-      setError("No se pudo conectar con la API. Intenta de nuevo.");
+      mostrar({ mensaje: "No se pudo conectar con la API. Intenta de nuevo.", campos: [] });
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <p>
-        <label htmlFor="titulo">Título</label><br />
-        <input id="titulo" name="titulo" defaultValue={book?.titulo} maxLength={250} required />
-      </p>
-      <p>
-        <label htmlFor="autor">Autor</label><br />
-        <input id="autor" name="autor" defaultValue={book?.autor} maxLength={250} required />
-      </p>
-      <p>
-        <label htmlFor="isbn">ISBN</label><br />
-        <input id="isbn" name="isbn" defaultValue={book?.isbn} maxLength={250} required />
-      </p>
-      <p>
-        <label htmlFor="genero">Género</label><br />
-        <input id="genero" name="genero" defaultValue={book?.genero} maxLength={250} required />
-      </p>
-      <p>
-        <label htmlFor="anio_publicacion">Año de publicación</label><br />
-        <input
-          id="anio_publicacion"
-          name="anio_publicacion"
-          type="number"
-          step={1}
-          max={new Date().getFullYear()}
-          defaultValue={book?.anio_publicacion}
-          required
-        />
-      </p>
-      <p>
-        <label htmlFor="paginas">Páginas</label><br />
-        <input id="paginas" name="paginas" type="number" min={1} step={1} defaultValue={book?.paginas} required />
-      </p>
-      <p>
-        <label htmlFor="sinopsis">Sinopsis (opcional)</label><br />
-        <textarea id="sinopsis" name="sinopsis" defaultValue={book?.sinopsis ?? ""} maxLength={4000} />
-      </p>
+    <form className="libro-form" onSubmit={handleSubmit} noValidate>
+      <div className="libro-campos">
+        {campos.map((campo) => {
+          const id = `${idPrefix}${campo.key}`;
 
-      {error && <p role="alert">{error}</p>}
+          return (
+            <Campo
+              key={campo.key}
+              id={id}
+              etiqueta={campo.label}
+              invalido={tieneError(campo.key)}
+              className={`span-${campo.span}`}
+            >
+              <EntradaResaltada
+                resaltar={
+                  tieneError(campo.key) ? caracteresInvalidos(campo.key, values[campo.key]) : []
+                }
+                id={id}
+                name={campo.key}
+                className={["entrada", "entrada--caja", campo.destacado ? "entrada--destacada" : "", campo.numero ? "numeros" : ""]
+                  .filter(Boolean)
+                  .join(" ")}
+                type="text"
+                inputMode={campo.numero ? "numeric" : undefined}
+                maxLength={campo.numero ? 10 : 250}
+                placeholder={campo.placeholder}
+                value={values[campo.key]}
+                required
+                onChange={(event) => change(campo.key, event.target.value)}
+                {...aria(campo.key)}
+              />
+            </Campo>
+          );
+        })}
 
-      <p>
-        <button type="submit" disabled={loading}>
+        <Campo
+          id={`${idPrefix}sinopsis`}
+          etiqueta={
+            <>
+              Sinopsis <span className="etiqueta-opcional">(opcional)</span>
+            </>
+          }
+          nota="Máx. 4000 caracteres"
+          className="span-6"
+        >
+          <textarea
+            id={`${idPrefix}sinopsis`}
+            name="sinopsis"
+            className="area"
+            maxLength={4000}
+            rows={4}
+            placeholder="De qué trata el libro, en pocas líneas."
+            value={sinopsis}
+            onChange={(event) => setSinopsis(event.target.value)}
+          />
+        </Campo>
+      </div>
+
+      {error && <MensajeError id={errores.idMensaje}>{error.mensaje}</MensajeError>}
+
+      <div className="acciones">
+        <button type="submit" className="boton" disabled={loading}>
           {loading ? "Guardando…" : "Guardar libro"}
-        </button>{" "}
-        <Link href={book ? `/catalogo/${book.id}` : "/catalogo"}>Cancelar</Link>
-      </p>
+        </button>
+        {onCancel ? (
+          <button type="button" className="boton-texto" onClick={onCancel} disabled={loading}>
+            Cancelar
+          </button>
+        ) : (
+          <Link href={book ? `/catalogo/${book.id}` : "/catalogo"} className="boton-texto">
+            Cancelar
+          </Link>
+        )}
+      </div>
     </form>
   );
 }

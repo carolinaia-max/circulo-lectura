@@ -22,7 +22,7 @@ export default async function BookDetailPage({
           : "No se pudo cargar el libro. Intenta de nuevo.";
 
     return (
-      <main>
+      <main className="pagina-simple">
         <p role="alert">{message}</p>
         <Link href="/catalogo">Volver al catálogo</Link>
       </main>
@@ -32,7 +32,7 @@ export default async function BookDetailPage({
   const book: Book = await response.json();
 
   return (
-    <main>
+    <main className="pagina-simple">
       <Link href="/catalogo">Volver al catálogo</Link>
       <h1>{book.titulo}</h1>
 

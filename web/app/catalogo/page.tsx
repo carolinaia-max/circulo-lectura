@@ -1,74 +1,48 @@
-import Link from "next/link";
-
 import LogoutButton from "./LogoutButton";
+import CatalogoInteractivo, { type Book } from "./CatalogoInteractivo";
 import { fetchCatalog } from "./catalogApi";
 
-type Book = {
-  id: number;
-  isbn: string;
-  titulo: string;
-  autor: string;
-  genero: string;
-  anio_publicacion: number;
-  paginas: number;
-};
+// Correo del usuario para la barra superior. Si no se puede obtener,
+// la barra muestra solo "Cerrar sesión".
+async function getUserEmail(): Promise<string | null> {
+  const response = await fetchCatalog("/auth/me");
+  if (!response?.ok) return null;
+
+  const user: unknown = await response.json().catch(() => null);
+  const email = (user as { email?: unknown } | null)?.email;
+
+  return typeof email === "string" ? email : null;
+}
 
 export default async function CatalogoPage() {
-  const response = await fetchCatalog("/books");
-
-  if (!response?.ok) {
-    return (
-      <main>
-        <h1>Catálogo de libros</h1>
-        <p role="alert">
-          No se pudo cargar el catálogo. Revisa que FastAPI esté corriendo y
-          recarga la página.
-        </p>
-      </main>
-    );
-  }
-
-  const books: Book[] = await response.json();
+  // Obtener los libros y el usuario desde FastAPI
+  const [response, email] = await Promise.all([
+    fetchCatalog("/books"),
+    getUserEmail(),
+  ]);
 
   return (
-    <main>
-      <h1>Catálogo de libros</h1>
-      <LogoutButton />
+    <div className="pagina-catalogo">
+      <header className="barra">
+        <nav aria-label="Sesión" className="barra-nav">
+          {email && <span className="barra-correo">{email}</span>}
+          <LogoutButton />
+        </nav>
+      </header>
 
-      <p>
-        <Link href="/catalogo/nuevo">Agregar libro</Link>
-      </p>
-
-      {books.length === 0 ? (
-        <p>Todavía no hay libros en el catálogo.</p>
+      {response?.ok ? (
+        <CatalogoInteractivo initialBooks={(await response.json()) as Book[]} />
       ) : (
-        <table>
-          <thead>
-            <tr>
-              <th scope="col">Título</th>
-              <th scope="col">Autor</th>
-              <th scope="col">ISBN</th>
-              <th scope="col">Género</th>
-              <th scope="col">Año</th>
-              <th scope="col">Páginas</th>
-            </tr>
-          </thead>
-          <tbody>
-            {books.map((book) => (
-              <tr key={book.id}>
-                <td>
-                  <Link href={`/catalogo/${book.id}`}>{book.titulo}</Link>
-                </td>
-                <td>{book.autor}</td>
-                <td>{book.isbn}</td>
-                <td>{book.genero}</td>
-                <td>{book.anio_publicacion}</td>
-                <td>{book.paginas}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <main className="catalogo">
+          <section className="catalogo-cabecera">
+            <h1>Catálogo</h1>
+          </section>
+          <p role="alert" className="mensaje-error catalogo-aviso">
+            No se pudo cargar el catálogo. Revisa que FastAPI esté funcionando y
+            recarga la página.
+          </p>
+        </main>
       )}
-    </main>
+    </div>
   );
 }
