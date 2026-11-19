@@ -57,9 +57,6 @@ a:hover {
   text-underline-offset: 3px;
 }
 
-/* =====================================
-   ENCABEZADO DEL CATALOGO
-   ===================================== */
 
 .catalog-header {
   display: flex;
@@ -113,10 +110,6 @@ a:hover {
   border-color: var(--accent-hover);
 }
 
-/* =====================================
-   SECCION DEL CATALOGO
-   ===================================== */
-
 .catalog-section {
   width: 100%;
 }
@@ -168,9 +161,6 @@ a:hover {
   color: #777777;
 }
 
-/* =====================================
-   TABLAS GENERALES
-   ===================================== */
 
 table {
   width: 100%;
@@ -199,9 +189,6 @@ tbody tr:hover {
   background: #f7f7f7;
 }
 
-/* =====================================
-   BOTONES GENERALES
-   ===================================== */
 
 button {
   background: var(--accent);
@@ -225,9 +212,6 @@ button:disabled {
   cursor: not-allowed;
 }
 
-/* =====================================
-   FORMULARIOS GENERALES
-   ===================================== */
 
 form {
   max-width: 560px;
@@ -265,10 +249,6 @@ form p {
   color: #a00000;
 }
 
-/* =====================================
-   CONTENEDOR DE TABLA INTERACTIVA
-   ===================================== */
-
 .interactive-table {
   position: relative;
   width: 100%;
@@ -292,10 +272,6 @@ form p {
   vertical-align: middle;
 }
 
-/* =====================================
-   FILAS INTERACTIVAS
-   ===================================== */
-
 .interactive-row {
   cursor: pointer;
   transition: background 0.15s ease;
@@ -309,10 +285,6 @@ form p {
 .interactive-row.row-editing {
   background: #fafafa;
 }
-
-/* =====================================
-   TITULOS DE LOS LIBROS
-   ===================================== */
 
 .book-title-button {
   display: inline;
@@ -338,10 +310,6 @@ form p {
   outline: 2px solid #111111;
   outline-offset: 4px;
 }
-
-/* =====================================
-   LAPIZ PARA EDITAR LIBROS
-   ===================================== */
 
 .table-edit-button {
   display: inline-flex;
@@ -371,10 +339,6 @@ form p {
   height: 18px;
 }
 
-/* =====================================
-   CAMPOS EDITABLES DE LA TABLA
-   ===================================== */
-
 .table-edit-input {
   width: 100%;
   min-width: 75px;
@@ -391,10 +355,6 @@ form p {
   outline: 1px solid #111111;
   border-color: #111111;
 }
-
-/* =====================================
-   GUARDAR Y CANCELAR EDICION
-   ===================================== */
 
 .table-save-actions {
   display: flex;
@@ -439,10 +399,6 @@ form p {
   margin-top: 12px;
 }
 
-/* =====================================
-   ACCESIBILIDAD
-   ===================================== */
-
 .sr-only {
   position: absolute;
   width: 1px;
@@ -454,10 +410,6 @@ form p {
   white-space: nowrap;
   border: 0;
 }
-
-/* =====================================
-   FONDO DEL MODAL DE SINOPSIS
-   ===================================== */
 
 .book-modal-overlay {
   position: fixed;
@@ -704,7 +656,6 @@ form p {
   opacity: 0.45;
   cursor: not-allowed;
 }
-/* Columna de acciones visible en cada fila */
 .interactive-table th.book-actions-heading,
 .interactive-table td.book-actions-cell {
   text-align: center;
