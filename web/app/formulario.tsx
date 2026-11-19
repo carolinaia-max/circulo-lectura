@@ -4,7 +4,9 @@ import {
   useLayoutEffect,
   useRef,
   useState,
+  type ChangeEvent,
   type InputHTMLAttributes,
+  type KeyboardEvent,
   type ReactNode,
   type RefObject,
 } from "react";
@@ -249,6 +251,38 @@ export function EntradaResaltada({
       )}
     </span>
   );
+}
+
+// CAMPOS SIN ESPACIOS (contraseñas)
+
+const ESPACIOS = /\s/g;
+
+// Quita los espacios (y tabulaciones, saltos de línea o espacios duros) del
+// campo y deja el cursor donde estaba, descontando los espacios quitados.
+function quitarEspacios(input: HTMLInputElement) {
+  const { value } = input;
+  if (!/\s/.test(value)) return;
+
+  const cursor = input.selectionStart ?? value.length;
+  const nuevoCursor = value.slice(0, cursor).replace(ESPACIOS, "").length;
+
+  input.value = value.replace(ESPACIOS, "");
+  input.setSelectionRange(nuevoCursor, nuevoCursor);
+}
+
+// Propiedades para un <input> no controlado que no admite espacios:
+// la barra espaciadora no escribe nada y, si un espacio llega por otra vía
+// (pegar, arrastrar, autocompletar, teclado del celular), se quita al instante.
+export function sinEspacios(alCambiar?: () => void) {
+  return {
+    onKeyDown: (event: KeyboardEvent<HTMLInputElement>) => {
+      if (event.key === " " || event.key === "Spacebar") event.preventDefault();
+    },
+    onChange: (event: ChangeEvent<HTMLInputElement>) => {
+      quitarEspacios(event.currentTarget);
+      alCambiar?.();
+    },
+  };
 }
 
 // Lleva el foco a un campo por su id (por ejemplo, el primero con error).

@@ -9,6 +9,7 @@ import {
   enfocarCampo,
   leerErrorApi,
   mensajeObligatorios,
+  sinEspacios,
   useErroresDeCampos,
   type ErrorDeCampos,
 } from "../formulario";
@@ -161,7 +162,7 @@ export default function RegistroPage() {
               minLength={8}
               maxLength={128}
               required
-              onChange={() => limpiarCampo("password")}
+              {...sinEspacios(() => limpiarCampo("password"))}
               {...aria("password")}
             />
           </Campo>
