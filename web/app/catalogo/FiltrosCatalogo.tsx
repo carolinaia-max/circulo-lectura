@@ -1,9 +1,12 @@
 "use client";
 
-import { Selector } from "../formulario";
+import { useRef } from "react";
+
+import { Casilla, Selector } from "../formulario";
 import {
   GENEROS,
   aniosDisponibles,
+  esAnonimo,
   generoDeLista,
   sinAcentos,
   type Book,
@@ -12,6 +15,8 @@ import {
 export type Filtros = {
   titulo: string;
   autor: string;
+  // "1" cuando se buscan solo libros de autor anónimo.
+  anonimo: string;
   genero: string;
   desde: string;
   hasta: string;
@@ -22,6 +27,7 @@ export type Filtros = {
 export const FILTROS_VACIOS: Filtros = {
   titulo: "",
   autor: "",
+  anonimo: "",
   genero: "",
   desde: "",
   hasta: "",
@@ -69,7 +75,11 @@ export function filtrarLibros(
   return books.filter((book) => {
     if (book.id === siempreVisible) return true;
     if (filtros.titulo.trim() && !contienePalabras(book.titulo, filtros.titulo)) return false;
-    if (filtros.autor.trim() && !contienePalabras(book.autor, filtros.autor)) return false;
+    if (filtros.anonimo) {
+      if (!esAnonimo(book.autor)) return false;
+    } else if (filtros.autor.trim() && !contienePalabras(book.autor, filtros.autor)) {
+      return false;
+    }
     if (filtros.genero && generoDeLista(book.genero) !== filtros.genero) return false;
     if (book.anio_publicacion < min || book.anio_publicacion > max) return false;
     if (rango && (book.paginas < rango.min || book.paginas > rango.max)) return false;
@@ -97,6 +107,19 @@ export default function FiltrosCatalogo({
     onChange({ ...filtros, [campo]: valor });
   }
 
+  // Anónimo: bloquea el campo de autor y lo vacía; al desmarcarlo vuelve
+  // lo que se había escrito.
+  const autorEscrito = useRef("");
+  function cambiarAnonimo(marcado: boolean) {
+    if (marcado) {
+      autorEscrito.current = filtros.autor;
+      onChange({ ...filtros, anonimo: "1", autor: "" });
+    } else {
+      onChange({ ...filtros, anonimo: "", autor: autorEscrito.current });
+      setTimeout(() => document.getElementById("filtro-autor")?.focus());
+    }
+  }
+
   return (
     <div className="filtros" role="search" aria-label="Filtrar el catálogo">
       <div className="filtros-campos">
@@ -115,14 +138,20 @@ export default function FiltrosCatalogo({
         </div>
 
         <div className="campo filtro--ancho">
-          <label htmlFor="filtro-autor" className="etiqueta">
-            Autor
-          </label>
+          <div className="campo-cabecera">
+            <label htmlFor="filtro-autor" className="etiqueta">
+              Autor
+            </label>
+            <Casilla checked={filtros.anonimo === "1"} onChange={cambiarAnonimo}>
+              Anónimo
+            </Casilla>
+          </div>
           <input
             id="filtro-autor"
             className="entrada entrada--filtro"
-            placeholder="Escribe un autor"
+            placeholder={filtros.anonimo ? "Anónimo" : "Escribe un autor"}
             autoComplete="off"
+            disabled={filtros.anonimo === "1"}
             value={filtros.autor}
             onChange={(event) => cambiar("autor", event.target.value)}
           />

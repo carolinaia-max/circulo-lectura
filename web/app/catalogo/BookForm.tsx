@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 
 import {
   Campo,
+  Casilla,
   EntradaResaltada,
   MensajeError,
   Selector,
@@ -14,8 +15,10 @@ import {
   type ErrorDeCampos,
 } from "../formulario";
 import {
+  AUTOR_ANONIMO,
   GENEROS,
   aniosDisponibles,
+  esAnonimo,
   borradorDesdeLibro,
   caracteresInvalidos,
   libroDesdeBorrador,
@@ -66,6 +69,22 @@ export default function BookForm({
   const [loading, setLoading] = useState(false);
   const errores = useErroresDeCampos(`${idPrefix}error`);
   const { error, marcar, limpiarCampo, tieneError, aria } = errores;
+
+  // Autor anónimo: con la casilla marcada, el autor es "Anónimo" y el campo
+  // se bloquea. Al desmarcarla vuelve lo que se había escrito.
+  const [anonimo, setAnonimo] = useState(() => esAnonimo(book?.autor ?? ""));
+  const autorEscrito = useRef(book && !esAnonimo(book.autor) ? book.autor : "");
+
+  function cambiarAnonimo(marcado: boolean) {
+    setAnonimo(marcado);
+    if (marcado) {
+      autorEscrito.current = values.autor;
+      change("autor", AUTOR_ANONIMO);
+    } else {
+      change("autor", autorEscrito.current);
+      setTimeout(() => enfocarCampo(`${idPrefix}autor`));
+    }
+  }
 
   function mostrar(nuevo: ErrorDeCampos) {
     marcar(nuevo);
@@ -143,6 +162,13 @@ export default function BookForm({
               etiqueta={campo.label}
               invalido={tieneError(campo.key)}
               className={`span-${campo.span}`}
+              accesorio={
+                campo.key === "autor" ? (
+                  <Casilla checked={anonimo} onChange={cambiarAnonimo} disabled={loading}>
+                    Anónimo
+                  </Casilla>
+                ) : undefined
+              }
             >
               {campo.opciones ? (
                 <Selector
@@ -172,6 +198,7 @@ export default function BookForm({
                   placeholder={campo.placeholder}
                   value={values[campo.key]}
                   required
+                  disabled={campo.key === "autor" && anonimo}
                   onChange={(event) => change(campo.key, event.target.value)}
                   {...aria(campo.key)}
                 />

@@ -9,6 +9,7 @@ import FiltrosCatalogo, {
   type Filtros,
 } from "./FiltrosCatalogo";
 import {
+  Casilla,
   EntradaResaltada,
   ErrorApi,
   MensajeError,
@@ -26,9 +27,11 @@ import {
   IlustracionNuevoLibro,
 } from "../ilustraciones";
 import {
+  AUTOR_ANONIMO,
   GENEROS,
   aniosDisponibles,
   borradorDesdeLibro,
+  esAnonimo,
   caracteresInvalidos,
   libroDesdeBorrador,
   validateBook,
@@ -74,6 +77,8 @@ export default function CatalogoInteractivo({ initialBooks }: Props) {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editingBook, setEditingBook] = useState<Book | null>(null);
   const [draft, setDraft] = useState<BorradorLibro | null>(null);
+  const [draftAnonimo, setDraftAnonimo] = useState(false);
+  const rowWrittenAuthor = useRef("");
   const [saving, setSaving] = useState(false);
   const filaErrores = useErroresDeCampos(ID_ERROR_FILA);
 
@@ -140,6 +145,8 @@ export default function CatalogoInteractivo({ initialBooks }: Props) {
   useEffect(() => {
     if (editingId !== null) {
       enfocarCampo(`fila-${editingId}-titulo`);
+      // Que se vea la fila completa (incluida la casilla "Anónimo").
+      document.querySelector(".fila--edicion")?.scrollIntoView({ block: "nearest" });
       return;
     }
 
@@ -311,9 +318,26 @@ export default function CatalogoInteractivo({ initialBooks }: Props) {
       filaErrores.marcar(null);
       setEditingBook(fullBook);
       setDraft(borradorDesdeLibro(fullBook));
+      setDraftAnonimo(esAnonimo(fullBook.autor));
+      rowWrittenAuthor.current = esAnonimo(fullBook.autor) ? "" : fullBook.autor;
       setEditingId(book.id);
     } catch (err) {
       setError(err instanceof Error ? err.message : "No se pudo cargar el libro.");
+    }
+  }
+
+  // Autor anónimo en la fila: bloquea el campo y guarda "Anónimo";
+  // al desmarcar vuelve lo que se había escrito.
+  function changeRowAnonymous(marcado: boolean) {
+    if (!draft || !editingBook) return;
+    setDraftAnonimo(marcado);
+    if (marcado) {
+      rowWrittenAuthor.current = draft.autor;
+      changeField("autor", AUTOR_ANONIMO);
+    } else {
+      changeField("autor", rowWrittenAuthor.current);
+      const id = `fila-${editingBook.id}-autor`;
+      setTimeout(() => enfocarCampo(id));
     }
   }
 
@@ -552,7 +576,7 @@ export default function CatalogoInteractivo({ initialBooks }: Props) {
                                 inputMode={column.numero ? "numeric" : undefined}
                                 value={draft[column.key]}
                                 maxLength={column.numero ? 10 : 250}
-                                disabled={saving}
+                                disabled={saving || (column.key === "autor" && draftAnonimo)}
                                 onChange={(event) => changeField(column.key, event.target.value)}
                                 onKeyDown={(event) => {
                                   if (event.key === "Enter") saveChanges();
@@ -560,6 +584,15 @@ export default function CatalogoInteractivo({ initialBooks }: Props) {
                                 }}
                                 {...filaErrores.aria(column.key)}
                               />
+                            )}
+                            {column.key === "autor" && (
+                              <Casilla
+                                checked={draftAnonimo}
+                                onChange={changeRowAnonymous}
+                                disabled={saving}
+                              >
+                                Anónimo
+                              </Casilla>
                             )}
                           </td>
                         );

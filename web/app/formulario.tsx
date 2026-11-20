@@ -118,6 +118,7 @@ export function Campo({
   id,
   etiqueta,
   nota,
+  accesorio,
   invalido,
   className,
   children,
@@ -125,6 +126,8 @@ export function Campo({
   id: string;
   etiqueta: ReactNode;
   nota?: string;
+  // Control que va a la derecha de la etiqueta (por ejemplo, "Anónimo").
+  accesorio?: ReactNode;
   invalido?: boolean;
   className?: string;
   children: ReactNode;
@@ -141,16 +144,46 @@ export function Campo({
 
   return (
     <div className={clases}>
-      {nota ? (
+      {nota || accesorio ? (
         <div className="campo-cabecera">
           {label}
-          <span className="campo-nota">{nota}</span>
+          {nota && <span className="campo-nota">{nota}</span>}
+          {accesorio}
         </div>
       ) : (
         label
       )}
       {children}
     </div>
+  );
+}
+
+// Casilla de verificación con el estilo del proyecto (cuadro negro, sin
+// esquinas redondeadas). El área clickeable mide al menos 44 px de alto.
+export function Casilla({
+  checked,
+  onChange,
+  disabled,
+  children,
+  className,
+}: {
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  disabled?: boolean;
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <label className={["casilla", className ?? ""].filter(Boolean).join(" ")}>
+      <input
+        type="checkbox"
+        checked={checked}
+        disabled={disabled}
+        onChange={(event) => onChange(event.target.checked)}
+      />
+      <span className="casilla-cuadro" aria-hidden="true" />
+      {children}
+    </label>
   );
 }
 
@@ -261,12 +294,19 @@ export function EntradaResaltada({
 // Una opción puede ser un texto (valor y texto iguales) o un par valor/texto.
 export type OpcionSelector = string | { valor: string; texto: string };
 
+// Texto sin acentos ni mayúsculas, para la búsqueda por teclado.
+function normalizar(texto: string): string {
+  return texto.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
+}
+
 export function Selector({
   opciones,
   placeholder,
   vacioElegible = false,
   value,
   className,
+  onChange,
+  onKeyDown,
   ...props
 }: Omit<SelectHTMLAttributes<HTMLSelectElement>, "value"> & {
   opciones: OpcionSelector[];
@@ -284,9 +324,62 @@ export function Selector({
     .filter(Boolean)
     .join(" ");
 
+  // BÚSQUEDA POR TECLADO
+  // Con el menú enfocado, escribir salta a la primera opción que empieza
+  // con lo tecleado (sin acentos ni mayúsculas). No se escribe nada: solo
+  // cambia la opción elegida. Las letras tecleadas en menos de 1 segundo se
+  // juntan ("18" → 1899, "186" → 1869); repetir la misma letra pasa a la
+  // siguiente opción que empieza con ella ("t", "t" → Thriller, Terror).
+  const tecleado = useRef({ texto: "", hasta: 0 });
+
+  function buscarPorTeclado(event: KeyboardEvent<HTMLSelectElement>) {
+    onKeyDown?.(event);
+    if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.altKey) return;
+    if (event.key.length !== 1) return; // solo teclas que escriben un carácter
+
+    const ahora = Date.now();
+    const buffer = tecleado.current;
+    if (ahora > buffer.hasta) buffer.texto = "";
+    // Un espacio al principio abre el menú, como siempre.
+    if (event.key === " " && buffer.texto === "") return;
+
+    event.preventDefault();
+    buffer.texto += normalizar(event.key);
+    buffer.hasta = ahora + 1000;
+
+    const elegibles = [
+      ...(vacioElegible ? [{ valor: "", texto: placeholder }] : []),
+      ...lista,
+    ];
+    const misma = [...buffer.texto].every((letra) => letra === buffer.texto[0]);
+    const busqueda = misma ? buffer.texto[0] : buffer.texto;
+    const coincidencias = elegibles.filter((opcion) =>
+      normalizar(opcion.texto).startsWith(busqueda),
+    );
+    if (!coincidencias.length) return;
+
+    let elegida = coincidencias[0];
+    if (misma && buffer.texto.length > 1) {
+      // Misma letra repetida: avanzar a la siguiente con esa letra.
+      const actual = coincidencias.findIndex((opcion) => opcion.valor === value);
+      elegida = coincidencias[(actual + 1) % coincidencias.length];
+    }
+    if (elegida.valor === value) return;
+
+    const select = event.currentTarget;
+    select.value = elegida.valor;
+    onChange?.({ ...event, target: select, currentTarget: select } as unknown as ChangeEvent<HTMLSelectElement>);
+  }
+
   return (
     <span className="selector">
-      <select value={value} className={clases} {...props}>
+      <select
+        value={value}
+        className={clases}
+        onChange={onChange}
+        onKeyDown={buscarPorTeclado}
+        {...props}
+      >
         <option value="" disabled={!vacioElegible}>
           {placeholder}
         </option>

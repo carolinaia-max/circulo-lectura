@@ -43,7 +43,16 @@ export const GENEROS = [
   "Novela histórica",
   "Aventuras",
   "Infantil/Juvenil",
+  "Divulgación científica",
+  "Otro",
 ];
+
+// Autor anónimo: se marca con una casilla y se guarda con este texto.
+export const AUTOR_ANONIMO = "Anónimo";
+
+export function esAnonimo(autor: string): boolean {
+  return sinAcentos(autor) === "anonimo";
+}
 
 // Años disponibles: del actual hacia atrás hasta la imprenta de Gutenberg.
 export const ANIO_MINIMO = 1450;
@@ -67,7 +76,7 @@ export function generoDeLista(genero: string): string {
 export function borradorDesdeLibro(book?: Book): BorradorLibro {
   return {
     titulo: book?.titulo ?? "",
-    autor: book?.autor ?? "",
+    autor: book ? (esAnonimo(book.autor) ? AUTOR_ANONIMO : book.autor) : "",
     isbn: book?.isbn ?? "",
     genero: book ? generoDeLista(book.genero) : "",
     anio_publicacion: book ? String(book.anio_publicacion) : "",
