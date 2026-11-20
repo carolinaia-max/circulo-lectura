@@ -600,7 +600,7 @@ button:disabled {
   flex: none;
   display: flex;
   justify-content: flex-end;
-  padding: clamp(6px, 1.8vh, 20px) 64px;
+  padding: 20px 64px;
 }
 
 .barra-nav {
@@ -608,7 +608,7 @@ button:disabled {
   flex-wrap: wrap;
   align-items: center;
   justify-content: flex-end;
-  gap: 12px 32px;
+  gap: 16px 32px;
   font-size: 15px;
 }
 
@@ -640,12 +640,206 @@ button:disabled {
   text-underline-offset: 4px;
 }
 
+/* ---------- Menú lateral ---------- */
+
+/* El círculo queda por encima de la capa y del panel, así que volver a
+   hacer clic en él también cierra el menú. */
+.menu-boton {
+  position: relative;
+  z-index: 40;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+}
+
+.menu-capa {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: rgba(17, 17, 17, 0.55);
+}
+
+.menu-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 35;
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  padding: 112px 0 40px;
+  overflow-y: auto;
+  border-left: 4px solid var(--tinta);
+  background: var(--fondo);
+}
+
+.menu-titulo {
+  padding: 0 32px 16px;
+  border-bottom: 4px solid var(--tinta);
+  color: var(--gris);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.menu-opciones {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.menu-opciones > li + li {
+  border-top: 1px solid var(--tinta);
+}
+
+.menu-opcion {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px 32px;
+  color: var(--tinta);
+  text-decoration: none;
+}
+
+.menu-opcion:hover {
+  background: var(--fila);
+  color: var(--tinta);
+}
+
+.menu-opcion:focus-visible {
+  outline-offset: -3px;
+}
+
+.menu-opcion-icono {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border: 2px solid var(--tinta);
+  background: var(--fondo);
+  color: var(--tinta);
+}
+
+.menu-opcion-texto {
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.menu-opcion-marca {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  margin-left: auto;
+}
+
+.menu-opcion[aria-current="page"] .menu-opcion-icono {
+  background: var(--rojo);
+  color: #ffffff;
+}
+
+.menu-opcion[aria-current="page"] .menu-opcion-marca {
+  background: var(--rojo);
+}
+
+.menu-decoracion {
+  display: flex;
+  gap: 8px;
+  margin-top: auto;
+  padding: 40px 32px 0;
+}
+
+.menu-decoracion-roja {
+  width: 40px;
+  height: 10px;
+  background: var(--rojo);
+}
+
+.menu-decoracion-negra {
+  width: 10px;
+  height: 10px;
+  background: var(--tinta);
+}
+
+/* ---------- Inicio ---------- */
+
+.pagina-inicio {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.inicio {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 32px 96px;
+}
+
+.inicio-contenido {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+  max-width: 640px;
+  text-align: center;
+}
+
+.inicio-contenido > svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.inicio-texto {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.inicio-texto h1 {
+  margin: 0;
+  font-size: clamp(44px, 5vw, 72px);
+  font-weight: 800;
+  line-height: 0.92;
+  letter-spacing: -0.045em;
+}
+
+.inicio-regla {
+  width: 64px;
+  height: 4px;
+  background: var(--tinta);
+}
+
+.inicio-texto p {
+  margin: 0;
+  color: var(--gris);
+  font-size: 20px;
+  line-height: 1.5;
+}
+
 /* ---------- Catálogo: encabezado ---------- */
 
 .catalogo {
   max-width: 1440px;
   margin: 0 auto;
-  padding: clamp(12px, 5vh, 64px) 64px clamp(16px, 4vh, 96px);
+  padding: 24px 64px clamp(16px, 4vh, 96px);
 }
 
 .catalogo-cabecera {
@@ -655,16 +849,16 @@ button:disabled {
   justify-content: space-between;
   flex: none;
   gap: 32px;
-  padding-bottom: clamp(16px, 4vh, 40px);
+  padding-bottom: 56px;
   border-bottom: 4px solid var(--tinta);
 }
 
 .catalogo-cabecera h1 {
   margin: 0;
-  font-size: clamp(72px, min(11vw, 15vh), 168px);
+  font-size: clamp(56px, 7vw, 104px);
   font-weight: 800;
-  line-height: 0.82;
-  letter-spacing: -0.055em;
+  line-height: 0.9;
+  letter-spacing: -0.05em;
 }
 
 .catalogo-resumen {
@@ -717,6 +911,144 @@ button:disabled {
 
 .catalogo-aviso {
   padding-top: 24px;
+}
+
+/* ---------- Catálogo: filtros ---------- */
+
+.filtros {
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 28px 24px;
+  padding: 28px 0 32px;
+}
+
+.filtro {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.filtro--titulo { flex: 1.1 1 180px; }
+.filtro--autor { flex: 1.1 1 200px; }
+.filtro--genero { flex: 1 1 150px; }
+.filtro--anio { flex: 0.7 1 120px; }
+.filtro--corto { flex: 0.9 1 140px; }
+
+.filtro-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 15px;
+}
+
+.filtro-casilla {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: -14px 0;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.filtro-casilla input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--tinta);
+  cursor: pointer;
+}
+
+.filtro-campo {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-bottom: 2px solid var(--tinta);
+  border-radius: 0;
+  background: transparent;
+  color: var(--tinta);
+  font: inherit;
+  font-size: 17px;
+}
+
+.filtro-campo:focus {
+  border-bottom-color: var(--rojo);
+}
+
+.filtro-campo::placeholder {
+  color: var(--placeholder);
+  opacity: 1;
+}
+
+.filtro-campo:disabled {
+  border-bottom-color: var(--linea-suave);
+  color: var(--placeholder);
+  cursor: not-allowed;
+}
+
+.filtro-lista {
+  position: relative;
+}
+
+.filtro-lista .filtro-campo {
+  padding-right: 28px;
+  cursor: pointer;
+}
+
+.filtro-flecha {
+  position: absolute;
+  right: 4px;
+  bottom: 18px;
+  color: var(--tinta);
+  pointer-events: none;
+}
+
+.filtros-limpiar {
+  flex: none;
+  height: 44px;
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  color: var(--gris);
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 6px;
+  cursor: pointer;
+}
+
+.filtros-limpiar:hover {
+  color: var(--tinta);
+}
+
+.catalogo-sin-resultados {
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 72px 0;
+  border-top: 2px solid var(--tinta);
+  border-bottom: 1px solid var(--tinta);
+}
+
+.catalogo-sin-resultados p {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.catalogo-sin-resultados .boton-texto {
+  font-size: 17px;
 }
 
 /* ---------- Catálogo: tabla ---------- */
@@ -1056,6 +1388,244 @@ button:disabled {
   background: var(--rojo);
 }
 
+/* ---------- Libros de interés ---------- */
+
+.interes {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 24px 64px 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+.interes-cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px 64px;
+}
+
+.interes-cabecera h1 {
+  margin: 0;
+  font-size: clamp(56px, 7vw, 104px);
+  font-weight: 800;
+  line-height: 0.88;
+  letter-spacing: -0.05em;
+}
+
+.interes-resumen {
+  flex: 0 1 440px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.interes-lema {
+  margin: 0;
+  color: var(--gris);
+  font-size: 19px;
+  line-height: 1.45;
+}
+
+.interes-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.interes-contador {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.interes-contador-numero {
+  color: var(--rojo-texto);
+  font-size: 72px;
+  font-weight: 800;
+  line-height: 0.85;
+  letter-spacing: -0.05em;
+  font-variant-numeric: tabular-nums;
+}
+
+.interes-franja {
+  display: flex;
+  height: 16px;
+}
+
+.interes-franja > span:nth-child(1) { flex: 2; background: var(--tinta); }
+.interes-franja > span:nth-child(2) { flex: 1; background: var(--rojo); }
+.interes-franja > span:nth-child(3) { flex: 5; background: var(--tinta); }
+
+.interes-vacia {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.tarjetas {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+  gap: 24px;
+}
+
+.tarjeta {
+  min-height: 380px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 32px;
+  padding: 28px;
+  border: 2px solid;
+}
+
+.tarjeta--roja {
+  border-color: var(--rojo);
+  background: var(--rojo);
+  color: #ffffff;
+}
+
+.tarjeta--blanca {
+  border-color: var(--tinta);
+  background: var(--fondo);
+  color: var(--tinta);
+}
+
+.tarjeta--negra {
+  border-color: var(--tinta);
+  background: var(--tinta);
+  color: #ffffff;
+}
+
+/* Sobre fondo rojo o negro, el contorno de foco rojo no se vería. */
+.tarjeta--roja :focus-visible,
+.tarjeta--negra :focus-visible {
+  outline-color: #ffffff;
+}
+
+.tarjeta-arriba {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tarjeta-numero {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
+}
+
+.tarjeta-quitar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin: -10px -10px 0 0;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.tarjeta-quitar:hover:not(:disabled) {
+  border-color: currentColor;
+}
+
+.tarjeta-abajo {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.tarjeta-anio {
+  font-size: 88px;
+  font-weight: 800;
+  line-height: 0.82;
+  letter-spacing: -0.055em;
+  font-variant-numeric: tabular-nums;
+}
+
+.tarjeta-regla {
+  height: 2px;
+  background: currentColor;
+}
+
+.tarjeta-titulo {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  overflow-wrap: anywhere;
+}
+
+.tarjeta-autor {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.tarjeta-celda {
+  display: flex;
+}
+
+.tarjeta-nueva {
+  flex: 1;
+  min-height: 380px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 28px;
+  border: 2px solid var(--tinta);
+  border-radius: 0;
+  background: var(--fondo);
+  color: var(--tinta);
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  text-align: left;
+  cursor: pointer;
+}
+
+.tarjeta-nueva:hover {
+  background: var(--fila);
+}
+
+/* Modal "¡Un libro que nos interesa!" */
+
+.modal-nuevo--interes {
+  max-width: 1040px;
+}
+
+.modal-nuevo--interes .modal-nuevo-arte {
+  min-height: 360px;
+}
+
+.modal-nuevo--interes .modal-nuevo-cuerpo {
+  flex-basis: 480px;
+}
+
+.modal-nuevo--interes .modal-cabecera h2 {
+  font-size: 52px;
+  line-height: 0.92;
+}
+
 /* ---------- Páginas secundarias (detalle, nuevo, editar) ---------- */
 
 .pagina-simple {
@@ -1135,6 +1705,31 @@ button:disabled {
   .catalogo,
   .pagina-simple {
     padding: 32px 20px 64px;
+  }
+
+  .catalogo {
+    padding-top: 24px;
+  }
+
+  .interes {
+    padding: 24px 20px 64px;
+    gap: 32px;
+  }
+
+  .inicio {
+    padding: 32px 20px 64px;
+  }
+
+  .catalogo-sin-resultados {
+    padding: 48px 0;
+  }
+
+  .modal-nuevo--interes .modal-nuevo-arte {
+    min-height: 200px;
+  }
+
+  .modal-nuevo--interes .modal-cabecera h2 {
+    font-size: 40px;
   }
 
   .catalogo-cabecera {

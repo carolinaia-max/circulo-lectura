@@ -20,3 +20,16 @@ export async function fetchCatalog(path: string) {
 
   return response;
 }
+
+// Correo del usuario de la sesión, para el encabezado. Si no se puede
+// obtener, devuelve null y el encabezado muestra solo "Cerrar sesión".
+// Sin sesión válida, fetchCatalog redirige a /login.
+export async function getUserEmail(): Promise<string | null> {
+  const response = await fetchCatalog("/auth/me");
+  if (!response?.ok) return null;
+
+  const user: unknown = await response.json().catch(() => null);
+  const email = (user as { email?: unknown } | null)?.email;
+
+  return typeof email === "string" ? email : null;
+}

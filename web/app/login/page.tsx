@@ -84,7 +84,7 @@ export default function LoginPage() {
         return;
       }
 
-      window.location.assign("/catalogo");
+      window.location.assign("/inicio");
     } catch {
       mostrar({ mensaje: "No se pudo conectar con la API. Intenta de nuevo.", campos: [] });
     } finally {

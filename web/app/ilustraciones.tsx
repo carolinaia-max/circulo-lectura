@@ -1,5 +1,6 @@
 // Ilustraciones decorativas e íconos del diseño suizo.
-// Todas son decorativas: llevan aria-hidden y no tienen texto.
+// Casi todas son decorativas (aria-hidden, sin texto); LogoClub es una imagen
+// con nombre accesible.
 
 const ROJO = "#E30613";
 const TINTA = "#111111";
@@ -182,6 +183,92 @@ export function IconoBasura() {
       <path d="M9 6V3h6v3" />
       <path d="M5 6l1 15h12l1-15" />
       <path d="M10 10v7M14 10v7" />
+    </svg>
+  );
+}
+
+// LOGO DEL CLUB (Inicio): un libro abierto del que sale un mundo rojo.
+export function LogoClub() {
+  return (
+    <svg
+      role="img"
+      aria-label="Logo del Círculo de Lectura: un libro abierto del que sale un mundo"
+      width="220"
+      height="220"
+      viewBox="0 0 200 200"
+      fill="none"
+    >
+      <circle cx="100" cy="74" r="44" fill={ROJO} />
+      <ellipse cx="100" cy="74" rx="17" ry="44" stroke={BLANCO} strokeWidth="3" />
+      <path d="M56 74H144M61 54H139M61 94H139" stroke={BLANCO} strokeWidth="3" />
+      <path d="M100 124v10" stroke={TINTA} strokeWidth="4" />
+      <path
+        d="M100 146C80 134 46 130 18 136V178C46 172 80 174 100 186Z"
+        fill={BLANCO}
+        stroke={TINTA}
+        strokeWidth="4"
+        strokeLinejoin="miter"
+      />
+      <path
+        d="M100 146C120 134 154 130 182 136V178C154 172 120 174 100 186Z"
+        fill={BLANCO}
+        stroke={TINTA}
+        strokeWidth="4"
+        strokeLinejoin="miter"
+      />
+      <path d="M100 146V186" stroke={TINTA} strokeWidth="4" />
+    </svg>
+  );
+}
+
+// ÍCONOS DEL MENÚ LATERAL (el color sale de `color` en CSS)
+
+export function IconoCasa() {
+  return (
+    <svg aria-hidden="true" focusable="false" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="miter">
+      <path d="M3 11.5L12 4l9 7.5" />
+      <path d="M5.5 9.5V20h13V9.5" />
+      <path d="M10 20v-6h4v6" />
+    </svg>
+  );
+}
+
+export function IconoEstante() {
+  return (
+    <svg aria-hidden="true" focusable="false" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="miter">
+      <path d="M4 4h4v15H4z" />
+      <path d="M10 6h4v13h-4z" />
+      <path d="M15.5 6.8l3.6-1 3.4 12.6-3.6 1z" />
+      <path d="M2 21h20" />
+    </svg>
+  );
+}
+
+export function IconoMarcador() {
+  return (
+    <svg aria-hidden="true" focusable="false" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="miter">
+      <path d="M6 3h12v18l-6-4.5L6 21z" />
+      <path d="M12 13.2l-2.6-2.5a1.6 1.6 0 0 1 2.6-1.9 1.6 1.6 0 0 1 2.6 1.9z" />
+    </svg>
+  );
+}
+
+// Botón del menú: círculo con tres líneas. Cerrado, blanco con líneas
+// negras; abierto, negro con líneas blancas.
+export function IconoMenu({ abierto }: { abierto: boolean }) {
+  return (
+    <svg aria-hidden="true" focusable="false" width="48" height="48" viewBox="0 0 48 48">
+      <circle cx="24" cy="24" r="22" fill={abierto ? TINTA : BLANCO} stroke={TINTA} strokeWidth="2.5" />
+      <path d="M14 17h20M14 24h20M14 31h20" stroke={abierto ? BLANCO : TINTA} strokeWidth="2.5" />
+    </svg>
+  );
+}
+
+// Tarjeta "Sumar un libro a la lista": un "+" grande.
+export function IconoMasGrande() {
+  return (
+    <svg aria-hidden="true" focusable="false" width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="4">
+      <path d="M32 4v56M4 32h56" />
     </svg>
   );
 }
