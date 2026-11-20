@@ -161,15 +161,6 @@ export function IconoMas() {
   );
 }
 
-export function IconoLupa() {
-  return (
-    <svg aria-hidden="true" focusable="false" className="icono-lupa" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
-      <circle cx="8.5" cy="8.5" r="6.5" />
-      <path d="M13.5 13.5L19 19" />
-    </svg>
-  );
-}
-
 export function IconoCerrar() {
   return (
     <svg aria-hidden="true" focusable="false" width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth="2.5">

@@ -258,18 +258,28 @@ export function EntradaResaltada({
 // Un <select> con el estilo de los campos. Si el valor actual no está en
 // la lista (un libro antiguo con otro género o año), se muestra como opción
 // deshabilitada para que se vea qué tenía y haya que elegir uno válido.
+// Una opción puede ser un texto (valor y texto iguales) o un par valor/texto.
+export type OpcionSelector = string | { valor: string; texto: string };
+
 export function Selector({
   opciones,
   placeholder,
+  vacioElegible = false,
   value,
   className,
   ...props
 }: Omit<SelectHTMLAttributes<HTMLSelectElement>, "value"> & {
-  opciones: string[];
+  opciones: OpcionSelector[];
+  // Texto de la opción vacía ("Elige un género", "Todos"…).
   placeholder: string;
+  // true en los filtros: la opción vacía se puede volver a elegir.
+  vacioElegible?: boolean;
   value: string;
 }) {
-  const fueraDeLista = value !== "" && !opciones.includes(value);
+  const lista = opciones.map((opcion) =>
+    typeof opcion === "string" ? { valor: opcion, texto: opcion } : opcion,
+  );
+  const fueraDeLista = value !== "" && !lista.some((opcion) => opcion.valor === value);
   const clases = ["entrada", "selector-campo", value === "" ? "selector-vacio" : "", className ?? ""]
     .filter(Boolean)
     .join(" ");
@@ -277,7 +287,7 @@ export function Selector({
   return (
     <span className="selector">
       <select value={value} className={clases} {...props}>
-        <option value="" disabled>
+        <option value="" disabled={!vacioElegible}>
           {placeholder}
         </option>
         {fueraDeLista && (
@@ -285,9 +295,9 @@ export function Selector({
             {value} (no está en la lista)
           </option>
         )}
-        {opciones.map((opcion) => (
-          <option key={opcion} value={opcion}>
-            {opcion}
+        {lista.map((opcion) => (
+          <option key={opcion.valor} value={opcion.valor}>
+            {opcion.texto}
           </option>
         ))}
       </select>

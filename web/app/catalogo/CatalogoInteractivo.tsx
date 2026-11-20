@@ -3,6 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 
 import BookForm from "./BookForm";
+import FiltrosCatalogo, {
+  FILTROS_VACIOS,
+  filtrarLibros,
+  type Filtros,
+} from "./FiltrosCatalogo";
 import {
   EntradaResaltada,
   ErrorApi,
@@ -17,7 +22,6 @@ import {
   IconoBasura,
   IconoCerrar,
   IconoLapiz,
-  IconoLupa,
   IconoMas,
   IlustracionNuevoLibro,
 } from "../ilustraciones";
@@ -25,7 +29,6 @@ import {
   GENEROS,
   aniosDisponibles,
   borradorDesdeLibro,
-  sinAcentos,
   caracteresInvalidos,
   libroDesdeBorrador,
   validateBook,
@@ -88,8 +91,7 @@ export default function CatalogoInteractivo({ initialBooks }: Props) {
   const [deleteError, setDeleteError] = useState("");
 
   const [error, setError] = useState("");
-  const [search, setSearch] = useState("");
-  const searchRef = useRef<HTMLInputElement>(null);
+  const [filtros, setFiltros] = useState<Filtros>(FILTROS_VACIOS);
 
   const requestRef = useRef(0);
   const addDialogRef = useRef<HTMLDivElement>(null);
@@ -415,24 +417,12 @@ export default function CatalogoInteractivo({ initialBooks }: Props) {
 
   const rowLocked = editingId !== null || deleting;
 
-  // BÚSQUEDA
-  // Cada palabra buscada debe aparecer en el título, autor, género, año o
-  // ISBN, sin importar mayúsculas ni acentos. La fila en edición siempre
-  // se muestra.
-  const terms = sinAcentos(search).split(/\s+/).filter(Boolean);
-  const visibleBooks = terms.length
-    ? books.filter((book) => {
-        if (book.id === editingId) return true;
-        const text = sinAcentos(
-          [book.titulo, book.autor, book.genero, book.anio_publicacion, book.isbn].join(" "),
-        );
-        return terms.every((term) => text.includes(term));
-      })
-    : books;
+  // FILTROS (la fila en edición siempre se muestra)
+  const visibleBooks = filtrarLibros(books, filtros, editingId);
 
-  function clearSearch() {
-    setSearch("");
-    searchRef.current?.focus();
+  function clearFilters() {
+    setFiltros(FILTROS_VACIOS);
+    document.getElementById("filtro-titulo")?.focus();
   }
 
   return (
@@ -466,55 +456,22 @@ export default function CatalogoInteractivo({ initialBooks }: Props) {
         </div>
       )}
 
-      {/* BÚSQUEDA */}
+      {/* FILTROS */}
       {books.length > 0 && (
-        <div className="busqueda" role="search">
-          <label htmlFor="buscar-libro" className="etiqueta">
-            Buscar
-          </label>
-          <span className="busqueda-campo">
-            <IconoLupa />
-            <input
-              ref={searchRef}
-              id="buscar-libro"
-              type="search"
-              className="entrada"
-              placeholder="Título, autor, género, año o ISBN"
-              autoComplete="off"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Escape" && search) {
-                  event.preventDefault();
-                  setSearch("");
-                }
-              }}
-            />
-            {search && (
-              <button
-                type="button"
-                className="boton-icono busqueda-limpiar"
-                aria-label="Limpiar búsqueda"
-                onClick={clearSearch}
-              >
-                <IconoCerrar />
-              </button>
-            )}
-          </span>
-          <p className="busqueda-resultado" aria-live="polite">
-            {search.trim()
-              ? `${visibleBooks.length} de ${books.length} ${books.length === 1 ? "libro" : "libros"}`
-              : ""}
-          </p>
-        </div>
+        <FiltrosCatalogo
+          filtros={filtros}
+          onChange={setFiltros}
+          total={books.length}
+          visibles={visibleBooks.length}
+        />
       )}
 
       {/* SIN RESULTADOS */}
       {books.length > 0 && visibleBooks.length === 0 && (
         <div className="catalogo-vacio">
-          <p>Ningún libro coincide con «{search.trim()}».</p>
-          <button type="button" className="boton-texto" onClick={clearSearch}>
-            Limpiar búsqueda
+          <p>Ningún libro coincide con los filtros.</p>
+          <button type="button" className="boton-texto" onClick={clearFilters}>
+            Limpiar filtros
           </button>
         </div>
       )}
