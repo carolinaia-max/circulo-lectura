@@ -848,14 +848,15 @@ button:disabled {
   align-items: flex-end;
   justify-content: space-between;
   flex: none;
-  gap: 32px;
-  padding-bottom: 56px;
+  gap: 16px 32px;
+  padding-bottom: 20px;
   border-bottom: 4px solid var(--tinta);
 }
 
+/* Encabezado compacto: deja más alto para las filas de la tabla. */
 .catalogo-cabecera h1 {
   margin: 0;
-  font-size: clamp(56px, 7vw, 104px);
+  font-size: clamp(40px, 4.5vw, 64px);
   font-weight: 800;
   line-height: 0.9;
   letter-spacing: -0.05em;
@@ -864,20 +865,21 @@ button:disabled {
 .catalogo-resumen {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-end;
-  gap: 40px;
+  align-items: center;
+  gap: 16px 32px;
 }
 
+/* Número y etiqueta en una sola línea. */
 .contador {
   margin: 0;
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  align-items: baseline;
+  gap: 10px;
 }
 
 .contador-numero {
   color: var(--rojo-texto);
-  font-size: clamp(56px, 10vh, 96px);
+  font-size: clamp(40px, 4.5vw, 64px);
   font-weight: 800;
   line-height: 0.85;
   letter-spacing: -0.05em;
@@ -920,8 +922,8 @@ button:disabled {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
-  gap: 28px 24px;
-  padding: 28px 0 32px;
+  gap: 20px;
+  padding: 20px 0 24px;
 }
 
 .filtro {
@@ -931,11 +933,33 @@ button:disabled {
   gap: 10px;
 }
 
-.filtro--titulo { flex: 1.1 1 180px; }
-.filtro--autor { flex: 1.1 1 200px; }
-.filtro--genero { flex: 1 1 150px; }
-.filtro--anio { flex: 0.7 1 120px; }
-.filtro--corto { flex: 0.9 1 140px; }
+.filtro--titulo { flex: 1.2 1 150px; }
+.filtro--autor { flex: 1.2 1 190px; }
+.filtro--genero { flex: 1 1 130px; }
+.filtro--anio { flex: 0.8 1 110px; }
+.filtro--corto { flex: 0.8 1 110px; }
+
+/* En pantallas anchas, todos los filtros y "Limpiar filtros" van en un
+   solo renglón: los campos se encogen hasta un mínimo legible. */
+@media (min-width: 1200px) {
+  .filtros {
+    flex-wrap: nowrap;
+  }
+
+  .filtro--titulo { min-width: 110px; }
+  .filtro--autor { min-width: 165px; }
+  .filtro--genero { min-width: 135px; }
+  .filtro--anio { min-width: 95px; }
+  .filtro--corto { min-width: 100px; }
+}
+
+/* Entre 1200 y 1365 px los campos son angostos: letra un poco menor para
+   que el texto de las listas no se corte. */
+@media (min-width: 1200px) and (max-width: 1365px) {
+  .filtros .filtro-campo {
+    font-size: 15px;
+  }
+}
 
 .filtro-cabecera {
   display: flex;
@@ -974,7 +998,7 @@ button:disabled {
   background: transparent;
   color: var(--tinta);
   font: inherit;
-  font-size: 17px;
+  font-size: 16px;
 }
 
 .filtro-campo:focus {
@@ -997,13 +1021,13 @@ button:disabled {
 }
 
 .filtro-lista .filtro-campo {
-  padding-right: 28px;
+  padding-right: 22px;
   cursor: pointer;
 }
 
 .filtro-flecha {
   position: absolute;
-  right: 4px;
+  right: 2px;
   bottom: 18px;
   color: var(--tinta);
   pointer-events: none;
@@ -1550,12 +1574,21 @@ button:disabled {
   gap: 14px;
 }
 
-.tarjeta-anio {
-  font-size: 88px;
+/* Orden en la tarjeta: título (el más grande), autor y, al final, el año. */
+.tarjeta-titulo {
+  margin: 0;
+  font-size: 44px;
   font-weight: 800;
-  line-height: 0.82;
-  letter-spacing: -0.055em;
-  font-variant-numeric: tabular-nums;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  overflow-wrap: anywhere;
+}
+
+.tarjeta-autor {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 500;
+  overflow-wrap: anywhere;
 }
 
 .tarjeta-regla {
@@ -1563,20 +1596,12 @@ button:disabled {
   background: currentColor;
 }
 
-.tarjeta-titulo {
-  margin: 0;
-  font-size: 28px;
+.tarjeta-anio {
+  font-size: 24px;
   font-weight: 800;
-  line-height: 1.05;
-  letter-spacing: -0.025em;
-  overflow-wrap: anywhere;
-}
-
-.tarjeta-autor {
-  margin: 0;
-  font-size: 17px;
-  font-weight: 500;
-  overflow-wrap: anywhere;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
 }
 
 .tarjeta-celda {
@@ -1605,6 +1630,77 @@ button:disabled {
 
 .tarjeta-nueva:hover {
   background: var(--fila);
+}
+
+/* Sugerencias de Open Library (Título, Autor e ISBN en los modales) */
+
+.libro-form-ayuda {
+  margin: 0;
+  color: var(--gris);
+  font-size: 15px;
+}
+
+.con-sugerencias {
+  position: relative;
+}
+
+.sugerencias {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  border: 2px solid var(--tinta);
+  border-top: 0;
+  background: var(--fondo);
+}
+
+.sugerencias-lista {
+  max-height: 280px;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.sugerencia {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+  cursor: pointer;
+}
+
+.sugerencia + .sugerencia {
+  border-top: 1px solid var(--linea-suave);
+}
+
+.sugerencia[aria-selected="true"] {
+  background: var(--fila);
+  box-shadow: inset 4px 0 0 var(--rojo);
+}
+
+.sugerencia-titulo {
+  font-size: 16px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.sugerencia-detalle {
+  color: var(--gris);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.sugerencias-estado {
+  margin: 0;
+  padding: 8px 12px;
+  border-top: 1px solid var(--tinta);
+  color: var(--gris);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 /* Modal "¡Un libro que nos interesa!" */
@@ -1733,7 +1829,7 @@ button:disabled {
   }
 
   .catalogo-cabecera {
-    padding-bottom: 32px;
+    padding-bottom: 20px;
   }
 
   .catalogo-vacio {

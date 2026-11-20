@@ -15,11 +15,12 @@ import {
 import {
   IconoBasura,
   IconoCerrar,
-  IconoMas,
   IconoMasGrande,
   IlustracionNuevoLibro,
 } from "../ilustraciones";
 import { caracteresInvalidos } from "../catalogo/validacion";
+import type { CampoBusqueda, Sugerencia } from "../openLibrary/openLibrary";
+import { useAutocompletado } from "../openLibrary/useAutocompletado";
 import {
   BORRADOR_VACIO,
   MENSAJE_REPETIDO,
@@ -74,6 +75,23 @@ export default function ListaInteres({ inicial }: { inicial: LibroInteres[] }) {
   useFocoInicial(dialogoAgregarRef, agregando);
   useFocoInicial(dialogoQuitarRef, aQuitar !== null);
 
+  // SUGERENCIAS DE OPEN LIBRARY: Título y Autor buscan coincidencias (este
+  // modal no tiene ISBN). Al elegir una se completan título, autor y año.
+  const auto = useAutocompletado(valores, elegirSugerencia);
+
+  function elegirSugerencia(sugerencia: Sugerencia) {
+    const { titulo, autor, anio_publicacion } = sugerencia.datos;
+    setValores((actual) => ({
+      titulo: titulo || actual.titulo,
+      autor: autor || actual.autor,
+      // Si la obra no trae año, el campo queda vacío para escribirlo.
+      anio_publicacion,
+    }));
+    for (const campo of ["titulo", "autor", "anio_publicacion"] as CampoInteres[]) {
+      limpiarCampo(campo);
+    }
+  }
+
   const ocupado = guardando || quitando;
   const algunModal = agregando || aQuitar !== null;
 
@@ -85,7 +103,8 @@ export default function ListaInteres({ inicial }: { inicial: LibroInteres[] }) {
     document.body.style.overflow = "hidden";
 
     function alPresionar(event: KeyboardEvent) {
-      if (event.key !== "Escape" || ocupado) return;
+      // Un Escape que ya atendió otro control (la lista de sugerencias) no cierra el modal.
+      if (event.key !== "Escape" || event.defaultPrevented || ocupado) return;
       setAgregando(false);
       setAQuitar(null);
     }
@@ -127,6 +146,7 @@ export default function ListaInteres({ inicial }: { inicial: LibroInteres[] }) {
   async function agregar(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (guardando) return;
+    auto.cerrar();
 
     const validacion = validarInteres(valores, libros);
     if (validacion) {
@@ -230,10 +250,6 @@ export default function ListaInteres({ inicial }: { inicial: LibroInteres[] }) {
               <span className="interes-contador-numero">{dosDigitos(libros.length)}</span>
               <span className="etiqueta">En la lista</span>
             </p>
-            <button type="button" className="boton boton--alto" onClick={abrirAgregar}>
-              Agregar libro
-              <IconoMas />
-            </button>
           </div>
         </div>
       </section>
@@ -269,10 +285,10 @@ export default function ListaInteres({ inicial }: { inicial: LibroInteres[] }) {
             </div>
 
             <div className="tarjeta-abajo">
-              <span className="tarjeta-anio">{libro.anio_publicacion}</span>
-              <div className="tarjeta-regla" aria-hidden="true" />
               <h2 className="tarjeta-titulo">{libro.titulo}</h2>
               <p className="tarjeta-autor">{libro.autor}</p>
+              <div className="tarjeta-regla" aria-hidden="true" />
+              <span className="tarjeta-anio">{libro.anio_publicacion}</span>
             </div>
           </li>
         ))}
@@ -326,9 +342,50 @@ export default function ListaInteres({ inicial }: { inicial: LibroInteres[] }) {
                 </button>
               </div>
 
+              <p className="libro-form-ayuda">
+                Escribe el título o el autor y elige un libro de Open Library
+                para completar el resto de los datos.
+              </p>
+
               <div className="libro-campos">
                 {CAMPOS.map((campo) => {
                   const id = `${ID_PREFIJO}${campo.key}`;
+                  const busqueda: CampoBusqueda | null =
+                    campo.key === "titulo" || campo.key === "autor" ? campo.key : null;
+
+                  const entrada = (
+                    <EntradaResaltada
+                      resaltar={
+                        tieneError(campo.key)
+                          ? caracteresInvalidos(campo.key, valores[campo.key])
+                          : []
+                      }
+                      id={id}
+                      name={campo.key}
+                      className={[
+                        "entrada",
+                        "entrada--caja",
+                        campo.destacado ? "entrada--destacada" : "",
+                        campo.numero ? "numeros" : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" ")}
+                      type="text"
+                      inputMode={campo.numero ? "numeric" : undefined}
+                      maxLength={campo.numero ? 4 : 250}
+                      placeholder={campo.placeholder}
+                      value={valores[campo.key]}
+                      required
+                      disabled={guardando}
+                      onChange={(event) => {
+                        cambiar(campo.key, event.target.value);
+                        if (busqueda) auto.alEscribir(busqueda);
+                      }}
+                      {...(busqueda ? auto.propsEntrada(busqueda, id) : {})}
+                      {...aria(campo.key)}
+                    />
+                  );
+
                   return (
                     <Campo
                       key={campo.key}
@@ -337,32 +394,14 @@ export default function ListaInteres({ inicial }: { inicial: LibroInteres[] }) {
                       invalido={tieneError(campo.key)}
                       className={`span-${campo.span}`}
                     >
-                      <EntradaResaltada
-                        resaltar={
-                          tieneError(campo.key)
-                            ? caracteresInvalidos(campo.key, valores[campo.key])
-                            : []
-                        }
-                        id={id}
-                        name={campo.key}
-                        className={[
-                          "entrada",
-                          "entrada--caja",
-                          campo.destacado ? "entrada--destacada" : "",
-                          campo.numero ? "numeros" : "",
-                        ]
-                          .filter(Boolean)
-                          .join(" ")}
-                        type="text"
-                        inputMode={campo.numero ? "numeric" : undefined}
-                        maxLength={campo.numero ? 4 : 250}
-                        placeholder={campo.placeholder}
-                        value={valores[campo.key]}
-                        required
-                        disabled={guardando}
-                        onChange={(event) => cambiar(campo.key, event.target.value)}
-                        {...aria(campo.key)}
-                      />
+                      {busqueda ? (
+                        <div className="con-sugerencias">
+                          {entrada}
+                          {auto.lista(busqueda, id)}
+                        </div>
+                      ) : (
+                        entrada
+                      )}
                     </Campo>
                   );
                 })}

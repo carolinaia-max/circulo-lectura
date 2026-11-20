@@ -105,7 +105,8 @@ export default function CatalogoInteractivo({ initialBooks }: Props) {
     document.body.style.overflow = "hidden";
 
     function handleEscape(event: KeyboardEvent) {
-      if (event.key !== "Escape" || savingSynopsis || deleting) return;
+      // Un Escape que ya atendió otro control (la lista de sugerencias) no cierra el modal.
+      if (event.key !== "Escape" || event.defaultPrevented || savingSynopsis || deleting) return;
 
       requestRef.current += 1;
 
@@ -651,6 +652,7 @@ export default function CatalogoInteractivo({ initialBooks }: Props) {
 
               <BookForm
                 idPrefix="nuevo-"
+                buscarEnOpenLibrary
                 existingIsbns={books.map((book) => book.isbn)}
                 onCancel={() => setShowAddModal(false)}
                 onCreated={(created) => {
