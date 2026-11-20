@@ -1,0 +1,14 @@
+CREATE TABLE interest_books (
+    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    isbn TEXT NOT NULL,
+    titulo TEXT NOT NULL,
+    autor TEXT NOT NULL,
+    genero TEXT NOT NULL,
+    anio_publicacion INTEGER NOT NULL,
+    paginas INTEGER NOT NULL CHECK (paginas > 0),
+    sinopsis TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (user_id, isbn)
+);

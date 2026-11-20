@@ -42,8 +42,31 @@ import {
 
 export type { Book } from "./validacion";
 
+// Textos que cambian entre el catálogo del club y la lista de interés.
+export type TextosLista = {
+  titulo: string;
+  singular: string;
+  plural: string;
+  vacio: string;
+  // Lo que sigue a "¿Eliminar «…»": " del catálogo", " de tu lista"…
+  eliminarDe: string;
+};
+
+const TEXTOS_CATALOGO: TextosLista = {
+  titulo: "Catálogo",
+  singular: "Libro registrado",
+  plural: "Libros registrados",
+  vacio: "Todavía no hay libros en el catálogo.",
+  eliminarDe: "del catálogo",
+};
+
 type Props = {
   initialBooks: Book[];
+  // Ruta de la API: "/books" (catálogo del club) o "/interes" (tu lista).
+  apiBase?: string;
+  textos?: TextosLista;
+  // En el modal de agregar, sugerir libros de Open Library.
+  buscarEnOpenLibrary?: boolean;
 };
 
 // Columnas de la tabla, en orden.
@@ -69,7 +92,12 @@ function getErrorMessage(data: unknown, fallback: string): string {
   return leerErrorApi(data, fallback).mensaje;
 }
 
-export default function CatalogoInteractivo({ initialBooks }: Props) {
+export default function CatalogoInteractivo({
+  initialBooks,
+  apiBase = "/books",
+  textos = TEXTOS_CATALOGO,
+  buscarEnOpenLibrary = false,
+}: Props) {
   const [books, setBooks] = useState(initialBooks);
   const [showAddModal, setShowAddModal] = useState(false);
 
@@ -172,7 +200,7 @@ export default function CatalogoInteractivo({ initialBooks }: Props) {
 
   // Consultar un libro en FastAPI.
   async function getBook(id: number): Promise<Book> {
-    const response = await fetch(`/backend/books/${id}`, { cache: "no-store" });
+    const response = await fetch(`/backend${apiBase}/${id}`, { cache: "no-store" });
 
     if (response.status === 401) {
       window.location.assign("/login");
@@ -188,7 +216,7 @@ export default function CatalogoInteractivo({ initialBooks }: Props) {
 
   // Actualizar los datos de un libro.
   async function updateBook(book: Book): Promise<Book> {
-    const response = await fetch(`/backend/books/${book.id}`, {
+    const response = await fetch(`/backend${apiBase}/${book.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -418,7 +446,7 @@ export default function CatalogoInteractivo({ initialBooks }: Props) {
     setDeleteError("");
 
     try {
-      const response = await fetch(`/backend/books/${book.id}`, { method: "DELETE" });
+      const response = await fetch(`/backend${apiBase}/${book.id}`, { method: "DELETE" });
 
       if (response.status === 401) {
         window.location.replace("/login");
@@ -453,13 +481,13 @@ export default function CatalogoInteractivo({ initialBooks }: Props) {
     <main className="catalogo">
       {/* ENCABEZADO */}
       <section className="catalogo-cabecera">
-        <h1>Catálogo</h1>
+        <h1>{textos.titulo}</h1>
 
         <div className="catalogo-resumen">
           <p className="contador">
             <span className="contador-numero">{String(books.length).padStart(2, "0")}</span>
             <span className="etiqueta">
-              {books.length === 1 ? "Libro registrado" : "Libros registrados"}
+              {books.length === 1 ? textos.singular : textos.plural}
             </span>
           </p>
 
@@ -473,7 +501,7 @@ export default function CatalogoInteractivo({ initialBooks }: Props) {
       {/* CATÁLOGO VACÍO */}
       {books.length === 0 && (
         <div className="catalogo-vacio">
-          <p>Todavía no hay libros en el catálogo.</p>
+          <p>{textos.vacio}</p>
           <button type="button" className="boton-texto" onClick={() => setShowAddModal(true)}>
             Agregar el primero
           </button>
@@ -709,6 +737,8 @@ export default function CatalogoInteractivo({ initialBooks }: Props) {
 
               <BookForm
                 idPrefix="nuevo-"
+                apiBase={apiBase}
+                buscarEnOpenLibrary={buscarEnOpenLibrary}
                 existingIsbns={books.map((book) => book.isbn)}
                 onCancel={() => setShowAddModal(false)}
                 onCreated={(created) => {
@@ -844,7 +874,7 @@ export default function CatalogoInteractivo({ initialBooks }: Props) {
             aria-describedby="eliminar-descripcion"
           >
             <div className="modal-eliminar-texto">
-              <h2 id="eliminar-titulo">¿Eliminar «{deleteTarget.titulo}» del catálogo?</h2>
+              <h2 id="eliminar-titulo">¿Eliminar «{deleteTarget.titulo}» {textos.eliminarDe}?</h2>
               <p id="eliminar-descripcion">Esta acción no se puede deshacer.</p>
             </div>
 

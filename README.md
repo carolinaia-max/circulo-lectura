@@ -63,9 +63,19 @@ PostgreSQL conserva los datos entre arranques.
   preparar la cuenta de demostración. Next.js reenvía las peticiones
   `/backend/*` a FastAPI.
 
+## Páginas
+
+- `/inicio`: dashboard al que se llega tras iniciar sesión. El menú desplegable
+  **Biblioteca** de la barra superior lleva al catálogo o a los libros de interés.
+- `/catalogo`: libros que el club ya tiene en su biblioteca.
+- `/interes`: tus libros de interés, con la misma tabla y el botón
+  **Agregar libro**.
+
 ## Endpoints
 
-Las rutas de libros requieren una sesión válida.
+Las rutas de libros requieren una sesión válida. `/books` es el catálogo
+compartido del club; `/interes` es la lista de libros que cada usuario quiere
+que el club compre, y cada usuario solo ve y modifica la suya.
 
 | Método | Ruta | Operación |
 | --- | --- | --- |
@@ -79,6 +89,11 @@ Las rutas de libros requieren una sesión válida.
 | POST | `/books` | Crear un libro |
 | PUT | `/books/{book_id}` | Editar un libro |
 | DELETE | `/books/{book_id}` | Eliminar un libro |
+| GET | `/interes` | Listar tus libros de interés |
+| GET | `/interes/{book_id}` | Consultar un libro de tu lista |
+| POST | `/interes` | Agregar un libro a tu lista |
+| PUT | `/interes/{book_id}` | Editar un libro de tu lista |
+| DELETE | `/interes/{book_id}` | Quitar un libro de tu lista |
 
 La API devuelve `400` para datos inválidos, `401` cuando falta una sesión válida
 o las credenciales son incorrectas, `404` si el libro no existe y `409` si el
