@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import BookForm from "./BookForm";
+import FiltrosCatalogo, { FILTROS_VACIOS, cumpleFiltros, type Filtros } from "./FiltrosCatalogo";
 import {
   EntradaResaltada,
   ErrorApi,
@@ -81,6 +82,7 @@ export default function CatalogoInteractivo({ initialBooks }: Props) {
   const [deleteError, setDeleteError] = useState("");
 
   const [error, setError] = useState("");
+  const [filtros, setFiltros] = useState<Filtros>(FILTROS_VACIOS);
 
   const requestRef = useRef(0);
   const addDialogRef = useRef<HTMLDivElement>(null);
@@ -103,7 +105,8 @@ export default function CatalogoInteractivo({ initialBooks }: Props) {
     document.body.style.overflow = "hidden";
 
     function handleEscape(event: KeyboardEvent) {
-      if (event.key !== "Escape" || savingSynopsis || deleting) return;
+      // Un Escape que ya atendió otro control (la lista de sugerencias) no cierra el modal.
+      if (event.key !== "Escape" || event.defaultPrevented || savingSynopsis || deleting) return;
 
       requestRef.current += 1;
 
@@ -406,18 +409,27 @@ export default function CatalogoInteractivo({ initialBooks }: Props) {
 
   const rowLocked = editingId !== null || deleting;
 
+  // FILTROS: la fila que se está editando siempre se muestra, aunque deje
+  // de coincidir con los filtros mientras se escribe.
+  const visibleBooks = books.filter(
+    (book) => book.id === editingId || cumpleFiltros(book, filtros),
+  );
+
+  function limpiarFiltros() {
+    setFiltros(FILTROS_VACIOS);
+    document.getElementById("f-titulo")?.focus();
+  }
+
   return (
     <main className="catalogo">
       {/* ENCABEZADO */}
       <section className="catalogo-cabecera">
-        <h1>Catálogo</h1>
+        <h1>Catálogo de libros</h1>
 
         <div className="catalogo-resumen">
           <p className="contador">
             <span className="contador-numero">{String(books.length).padStart(2, "0")}</span>
-            <span className="etiqueta">
-              {books.length === 1 ? "Libro registrado" : "Libros registrados"}
-            </span>
+            <span className="etiqueta">Libros registrados</span>
           </p>
 
           <button type="button" className="boton boton--alto" onClick={() => setShowAddModal(true)}>
@@ -437,8 +449,28 @@ export default function CatalogoInteractivo({ initialBooks }: Props) {
         </div>
       )}
 
-      {/* TABLA DEL CATÁLOGO */}
+      {/* FILTROS */}
       {books.length > 0 && (
+        <FiltrosCatalogo
+          filtros={filtros}
+          onChange={setFiltros}
+          onLimpiar={limpiarFiltros}
+          books={books}
+        />
+      )}
+
+      {/* SIN RESULTADOS */}
+      {books.length > 0 && visibleBooks.length === 0 && (
+        <div className="catalogo-sin-resultados">
+          <p>Ningún libro coincide con los filtros.</p>
+          <button type="button" className="boton-texto" onClick={limpiarFiltros}>
+            Limpiar filtros
+          </button>
+        </div>
+      )}
+
+      {/* TABLA DEL CATÁLOGO */}
+      {visibleBooks.length > 0 && (
         <div className="tabla-scroll">
           <table className="tabla">
             <thead>
@@ -462,7 +494,7 @@ export default function CatalogoInteractivo({ initialBooks }: Props) {
             </thead>
 
             <tbody>
-              {books.map((book) => {
+              {visibleBooks.map((book) => {
                 const editing = editingId === book.id && draft !== null;
 
                 if (editing) {
@@ -620,6 +652,7 @@ export default function CatalogoInteractivo({ initialBooks }: Props) {
 
               <BookForm
                 idPrefix="nuevo-"
+                buscarEnOpenLibrary
                 existingIsbns={books.map((book) => book.isbn)}
                 onCancel={() => setShowAddModal(false)}
                 onCreated={(created) => {

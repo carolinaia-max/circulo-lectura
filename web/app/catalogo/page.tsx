@@ -1,18 +1,6 @@
-import LogoutButton from "./LogoutButton";
+import MenuLateral from "../MenuLateral";
 import CatalogoInteractivo, { type Book } from "./CatalogoInteractivo";
-import { fetchCatalog } from "./catalogApi";
-
-// Correo del usuario para la barra superior. Si no se puede obtener,
-// la barra muestra solo "Cerrar sesión".
-async function getUserEmail(): Promise<string | null> {
-  const response = await fetchCatalog("/auth/me");
-  if (!response?.ok) return null;
-
-  const user: unknown = await response.json().catch(() => null);
-  const email = (user as { email?: unknown } | null)?.email;
-
-  return typeof email === "string" ? email : null;
-}
+import { fetchCatalog, getUserEmail } from "./catalogApi";
 
 export default async function CatalogoPage() {
   // Obtener los libros y el usuario desde FastAPI
@@ -23,19 +11,14 @@ export default async function CatalogoPage() {
 
   return (
     <div className="pagina-catalogo">
-      <header className="barra">
-        <nav aria-label="Sesión" className="barra-nav">
-          {email && <span className="barra-correo">{email}</span>}
-          <LogoutButton />
-        </nav>
-      </header>
+      <MenuLateral email={email} />
 
       {response?.ok ? (
         <CatalogoInteractivo initialBooks={(await response.json()) as Book[]} />
       ) : (
         <main className="catalogo">
           <section className="catalogo-cabecera">
-            <h1>Catálogo</h1>
+            <h1>Catálogo de libros</h1>
           </section>
           <p role="alert" className="mensaje-error catalogo-aviso">
             No se pudo cargar el catálogo. Revisa que FastAPI esté funcionando y

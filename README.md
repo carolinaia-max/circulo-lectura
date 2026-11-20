@@ -65,7 +65,9 @@ PostgreSQL conserva los datos entre arranques.
 
 ## Endpoints
 
-Las rutas de libros requieren una sesión válida.
+Las rutas de libros requieren una sesión válida. La lista de interés es de
+cada usuario: `/interes` solo muestra y modifica los libros de quien inició sesión.
+Para agregar uno basta con `titulo`, `autor` y `anio_publicacion`.
 
 | Método | Ruta | Operación |
 | --- | --- | --- |
@@ -79,10 +81,13 @@ Las rutas de libros requieren una sesión válida.
 | POST | `/books` | Crear un libro |
 | PUT | `/books/{book_id}` | Editar un libro |
 | DELETE | `/books/{book_id}` | Eliminar un libro |
+| GET | `/interes` | Listar tus libros de interés |
+| POST | `/interes` | Agregar un libro a tu lista de interés |
+| DELETE | `/interes/{id}` | Quitar un libro de tu lista de interés |
 
 La API devuelve `400` para datos inválidos, `401` cuando falta una sesión válida
 o las credenciales son incorrectas, `404` si el libro no existe y `409` si el
-ISBN o el correo ya están registrados.
+ISBN o el correo ya están registrados, o si el libro ya está en tu lista de interés.
 
 ## Cómo probar el flujo
 
